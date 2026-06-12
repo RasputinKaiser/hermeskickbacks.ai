@@ -48,6 +48,7 @@ npm run hermes:check
 npm run hermes:verify
 npm run hermes:tui-links
 npm run hermes:tui-verify
+npm run upload:audit-public
 node scripts/install-hermes-plugin.mjs --dry-run
 node scripts/install-hermes-plugin.mjs --check
 node scripts/install-hermes-plugin.mjs --status --json
@@ -66,6 +67,10 @@ earnings movement, payout settlement, and a human-recorded click proof.
 `npm run hermes:tui-verify` checks that the local Hermes TUI source and built
 bundle still contain the status-row link path, then runs the focused TUI tests
 and typecheck.
+`npm run upload:audit-public` fetches `origin/main` and audits the public branch,
+remote paths/refs, repository metadata, and GitHub code search for blocked
+identity strings. It is intentionally separate from `hermes:verify` because it
+uses network and GitHub CLI state.
 
 ## Runtime Contract
 

@@ -200,6 +200,7 @@
     "hermes:status": "node scripts/install-hermes-plugin.mjs --status",
     "hermes:check": "node scripts/check-hermes-integration.mjs",
     "upload:safety": "node scripts/check-upload-safety.mjs",
+    "upload:audit-public": "node scripts/audit-public-upload.mjs",
     "hermes:verify": "npm run upload:safety && npm run hermes:check && npm run hermes:test && npm run hermes:status",
     "hermes:tui-links": "node scripts/patch-hermes-tui-clickable-ads.mjs",
     "hermes:tui-verify": "node scripts/verify-hermes-tui-clickable-ads.mjs",

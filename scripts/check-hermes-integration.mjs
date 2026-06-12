@@ -28,6 +28,7 @@ check("required Hermes plugin files exist", () => {
 check("Hermes upload and TUI link scripts are wired", () => {
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   assert(pkg.scripts?.["upload:safety"] === "node scripts/check-upload-safety.mjs", "missing upload safety script");
+  assert(pkg.scripts?.["upload:audit-public"] === "node scripts/audit-public-upload.mjs", "missing public upload audit script");
   assert(
     pkg.scripts?.["hermes:tui-links"] === "node scripts/patch-hermes-tui-clickable-ads.mjs",
     "missing Hermes TUI link patch script",
@@ -41,6 +42,7 @@ check("Hermes upload and TUI link scripts are wired", () => {
     "Hermes verify should run upload safety first",
   );
   assert(existsSync(join(root, "scripts", "check-upload-safety.mjs")), "missing upload safety checker");
+  assert(existsSync(join(root, "scripts", "audit-public-upload.mjs")), "missing public upload auditor");
   assert(existsSync(join(root, "scripts", "patch-hermes-tui-clickable-ads.mjs")), "missing TUI link patcher");
   assert(existsSync(join(root, "scripts", "verify-hermes-tui-clickable-ads.mjs")), "missing TUI link verifier");
 });
