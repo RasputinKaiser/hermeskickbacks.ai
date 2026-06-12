@@ -41,6 +41,10 @@ check("Hermes upload and TUI link scripts are wired", () => {
     pkg.scripts?.["hermes:verify"]?.startsWith("npm run upload:safety &&"),
     "Hermes verify should run upload safety first",
   );
+  assert(
+    pkg.scripts?.["hermes:full-verify"] === "npm run hermes:verify && npm run hermes:tui-verify && npm run upload:audit-public",
+    "missing full Hermes verification script",
+  );
   assert(existsSync(join(root, "scripts", "check-upload-safety.mjs")), "missing upload safety checker");
   assert(existsSync(join(root, "scripts", "audit-public-upload.mjs")), "missing public upload auditor");
   assert(existsSync(join(root, "scripts", "patch-hermes-tui-clickable-ads.mjs")), "missing TUI link patcher");

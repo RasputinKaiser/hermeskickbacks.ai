@@ -46,6 +46,7 @@ Useful command forms:
 npm run hermes:status
 npm run hermes:check
 npm run hermes:verify
+npm run hermes:full-verify
 npm run hermes:tui-links
 npm run hermes:tui-verify
 npm run upload:audit-public
@@ -71,6 +72,10 @@ and typecheck.
 remote paths/refs, repository metadata, and GitHub code search for blocked
 identity strings. It is intentionally separate from `hermes:verify` because it
 uses network and GitHub CLI state.
+`npm run hermes:full-verify` runs local plugin verification, local Hermes TUI
+clickable-ad verification, and the public upload audit in sequence. It is the
+strongest repeatable proof command, but it depends on the local Hermes TUI and
+network/GitHub CLI state.
 
 ## Runtime Contract
 
