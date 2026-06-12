@@ -20,6 +20,9 @@ const required = [
   "openExternalUrl",
   "stopImmediatePropagation",
   "onOpen(ad.url)",
+  "handleKickbacksAdClick",
+  "adStartCol",
+  "localCol",
 ];
 
 const failures = [];

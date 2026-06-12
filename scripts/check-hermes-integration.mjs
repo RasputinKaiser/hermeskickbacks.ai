@@ -16,8 +16,17 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const plugin = join(root, "hermes", "plugins", "kickbacks");
 const installer = join(root, "scripts", "install-hermes-plugin.mjs");
+const expectedOrigin = "https://github.com/RasputinKaiser/hermeskickbacks.ai.git";
+const expectedUpstream = "https://github.com/andrewmccalip/kickbacks.ai";
 
 const failures = [];
+
+check("fork remotes keep Hermes upload boundary", () => {
+  assert(gitOutput(["remote", "get-url", "origin"]) === expectedOrigin, "origin should target Hermes fork");
+  assert(gitOutput(["remote", "get-url", "--push", "origin"]) === expectedOrigin, "origin push should target Hermes fork");
+  assert(gitOutput(["remote", "get-url", "upstream"]) === expectedUpstream, "upstream should fetch source repo");
+  assert(gitOutput(["remote", "get-url", "--push", "upstream"]) === "DISABLED", "upstream push should stay disabled");
+});
 
 check("required Hermes plugin files exist", () => {
   for (const file of ["plugin.yaml", "__init__.py", "api.py", "tracker.py", "SKILL.md"]) {
@@ -282,6 +291,13 @@ function runInstallerExpectFailure(args) {
     stdout: result.stdout || "",
     stderr: result.stderr || "",
   };
+}
+
+function gitOutput(args) {
+  return execFileSync("git", args, {
+    cwd: root,
+    encoding: "utf8",
+  }).trim();
 }
 
 function walk(dir) {
