@@ -121,6 +121,29 @@ check("installer JSON status is machine-readable", () => {
   }
 });
 
+check("installer can write a machine-readable receipt", () => {
+  const tmp = mkdtempSync(join(tmpdir(), "kickbacks-hermes-receipt-"));
+  try {
+    const receiptPath = join(tmp, "receipt.json");
+    const output = execFileSync("node", [
+      installer,
+      "--status",
+      "--receipt",
+      receiptPath,
+      "--target",
+      join(tmp, "kickbacks"),
+    ], { encoding: "utf8" });
+    const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
+    assert(output.includes(`receipt: ${receiptPath}`), "status output should name receipt path");
+    assert(receipt.mode === "status", "receipt should include status mode");
+    assert(receipt.current === false, "receipt should expose current=false");
+    assert(Array.isArray(receipt.missing), "receipt should expose missing array");
+    assert(receipt.generatedAt, "receipt should include generatedAt");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 if (failures.length) {
   for (const failure of failures) console.error(`FAIL ${failure}`);
   process.exit(1);

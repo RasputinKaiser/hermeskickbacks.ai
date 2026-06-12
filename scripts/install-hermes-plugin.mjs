@@ -8,6 +8,7 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
@@ -23,6 +24,7 @@ const checkOnly = Boolean(args.check);
 const force = Boolean(args.force);
 const backup = !Boolean(args["no-backup"] || args.noBackup);
 const json = Boolean(args.json);
+const receiptPath = args.receipt ? resolve(String(args.receipt)) : "";
 
 main();
 
@@ -191,19 +193,23 @@ function readPluginVersion(root) {
 }
 
 function printStatus({ comparison, sourceVersion, targetVersion }) {
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    mode: statusOnly ? "status" : checkOnly ? "check" : dryRun ? "dry-run" : "install",
+    source,
+    target,
+    sourceVersion,
+    targetVersion,
+    current: comparison.current,
+    sourceFiles: comparison.sourceFiles,
+    targetFiles: comparison.targetFiles,
+    missing: comparison.missing,
+    changed: comparison.changed,
+    extra: comparison.extra,
+  };
+  writeReceipt(payload);
   if (json) {
-    console.log(JSON.stringify({
-      source,
-      target,
-      sourceVersion,
-      targetVersion,
-      current: comparison.current,
-      sourceFiles: comparison.sourceFiles,
-      targetFiles: comparison.targetFiles,
-      missing: comparison.missing,
-      changed: comparison.changed,
-      extra: comparison.extra,
-    }, null, 2));
+    console.log(JSON.stringify(payload, null, 2));
     return;
   }
   console.log(`source: ${source}`);
@@ -214,4 +220,11 @@ function printStatus({ comparison, sourceVersion, targetVersion }) {
   if (comparison.missing.length) console.log(`missing: ${comparison.missing.join(", ")}`);
   if (comparison.changed.length) console.log(`changed: ${comparison.changed.join(", ")}`);
   if (comparison.extra.length) console.log(`extra: ${comparison.extra.join(", ")}`);
+  if (receiptPath) console.log(`receipt: ${receiptPath}`);
+}
+
+function writeReceipt(payload) {
+  if (!receiptPath) return;
+  mkdirSync(dirname(receiptPath), { recursive: true });
+  writeFileSync(receiptPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
