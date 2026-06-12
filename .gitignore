@@ -2,3 +2,5 @@ node_modules/
 dist/
 .vsce-stage/
 *.vsix
+__pycache__/
+*.pyc

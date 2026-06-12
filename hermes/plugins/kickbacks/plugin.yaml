@@ -1,0 +1,4 @@
+name: kickbacks
+version: "0.1.0"
+description: "Get paid for waiting. Kickbacks monetizes Hermes Agent's thinking/processing wait states into sponsored ad placements. Connects to kickbacks.ai for ad inventory, impression tracking, and revenue sharing (up to 50%)."
+author: "Hermes + kickbacks.ai"

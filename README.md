@@ -61,9 +61,13 @@ Four surfaces, one extension:
 | **Thinking-shimmer** | Codex VS Code panel | A compatible extension build |
 | **Status-bar line** | Claude Code terminal CLI | Any Claude Code version |
 | **Spinner verb** | Claude Code terminal CLI | Claude Code **2.1.143+** |
+| **Runtime hooks** | Hermes Agent CLI/plugin runtime | Install `hermes/plugins/kickbacks` |
 
 VS Code surfaces work on local, Remote-SSH, devcontainers, and code-server.
 Older CLIs just keep their stock verbs — nothing breaks.
+
+This fork also carries a Hermes Agent integration. See [HERMES.md](HERMES.md)
+for install, status, testing, and proof-layer boundaries.
 
 ## 🚀 Install
 
@@ -96,6 +100,8 @@ src/
   metrics/         impression / view-threshold / click telemetry (idempotent)
   viewTracking/    "was it actually on screen long enough?" timer
   killswitch/      server-controlled global off-switch
+hermes/
+  plugins/         Hermes Agent plugin source and tests
 media/             logos + icons
 test/              the vitest suite that guards editor safety
 ```
@@ -109,6 +115,11 @@ separate private repository.
 npm install
 npm run build       # esbuild → dist/
 npm test            # vitest — the editor-safety net
+npm run hermes:test # Python tests for the Hermes plugin
+npm run hermes:status
+npm run hermes:check
+npm run hermes:verify
+npm run hermes:install
 npm run package     # produce the .vsix
 ```
 

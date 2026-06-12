@@ -7,7 +7,7 @@
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/andrewmccalip/kickbacks.ai.git"
+    "url": "https://github.com/RasputinKaiser/hermeskickbacks.ai.git"
   },
   "engines": {
     "vscode": "^1.80.0"
@@ -196,6 +196,11 @@
     "build": "node esbuild.mjs",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "hermes:install": "node scripts/install-hermes-plugin.mjs",
+    "hermes:status": "node scripts/install-hermes-plugin.mjs --status",
+    "hermes:check": "node scripts/check-hermes-integration.mjs",
+    "hermes:verify": "npm run hermes:check && npm run hermes:test && npm run hermes:status",
+    "hermes:test": "PYTHONPATH=hermes/plugins python3 -m unittest discover -s hermes/plugins/kickbacks/tests -p 'test_*.py'",
     "icon": "node scripts/gen-icon.mjs",
     "package": "node scripts/package.mjs",
     "marketplace:publish": "vsce publish --no-dependencies --packagePath kickbacks.vsix"
@@ -217,7 +222,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://kickbacks.ai",
   "bugs": {
-    "url": "https://github.com/andrewmccalip/kickbacks.ai/issues"
+    "url": "https://github.com/RasputinKaiser/hermeskickbacks.ai/issues"
   },
   "keywords": [
     "claude-code",
