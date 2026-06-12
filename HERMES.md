@@ -62,12 +62,13 @@ imported.
 
 `npm run hermes:tui-links` patches the local Hermes Ink TUI so the busy
 status-row sponsored phrase is read from `~/.kickbacks/hermes-ad.json` and
-rendered as a clickable Ink link using the ad's `click_url`. This is live TUI
-source/build integration; it is separate from backend metric acceptance,
-earnings movement, payout settlement, and a human-recorded click proof.
+rendered as both an Ink link and a direct TUI click target using the ad's
+`click_url`. This is live TUI source/build integration; it is separate from
+backend metric acceptance, earnings movement, payout settlement, and a
+human-recorded click proof.
 `npm run hermes:tui-verify` checks that the local Hermes TUI source and built
-bundle still contain the status-row link path, then runs the focused TUI tests
-and typecheck.
+bundle still contain the status-row link and direct click paths, then runs the
+focused TUI tests and typecheck.
 `npm run upload:audit-public` fetches `origin/main` and audits the public branch,
 remote paths/refs, repository metadata, and GitHub code search for blocked
 identity strings. It is intentionally separate from `hermes:verify` because it

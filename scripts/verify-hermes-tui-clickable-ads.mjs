@@ -15,6 +15,9 @@ const required = [
   "KickbacksTickerAdText",
   "KICKBACKS_HERMES_TUI_AD_CACHE",
   "click_url",
+  "openExternalUrl",
+  "stopImmediatePropagation",
+  "onOpen(ad.url)",
 ];
 
 const failures = [];

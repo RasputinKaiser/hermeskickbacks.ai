@@ -45,6 +45,12 @@ patchFile(appChrome, (src) => {
     tickerHelpers()
   );
 
+  out = insertAfterOnce(
+    out,
+    "import { stickyPromptFromViewport } from '../domain/viewport.js'",
+    "import { openExternalUrl } from '../lib/openExternalUrl.js'"
+  );
+
   out = replaceOnce(
     out,
     "  const verbSegment = showVerb ? ` ${padVerb(verb)}` : ''",
@@ -61,12 +67,11 @@ patchFile(appChrome, (src) => {
       "",
       "  if (ad) {",
       "    return (",
-      "      <Text color={color}>",
-      "        {frame}",
-      "        {' '}",
+      "      <Box flexDirection=\"row\">",
+      "        <Text color={color}>{frame} </Text>",
       "        <KickbacksTickerAdText ad={ad} />",
-      "        {durationSegment}",
-      "      </Text>",
+      "        <Text color={color}>{durationSegment}</Text>",
+      "      </Box>",
       "    )",
       "  }",
     ].join("\n")
@@ -96,6 +101,16 @@ if (existsSync(testFile)) {
       "import { afterEach, describe, expect, it, vi } from 'vitest'"
     );
 
+    out = insertBeforeOnce(
+      out,
+      "import { StatusRule } from '../components/appChrome.js'",
+      [
+        "import { renderToScreen } from '../../packages/hermes-ink/src/ink/render-to-screen.js'",
+        "import { cellAt } from '../../packages/hermes-ink/src/ink/screen.js'",
+        "",
+      ].join("\n")
+    );
+
     out = replaceOnce(
       out,
       "import { StatusRule } from '../components/appChrome.js'",
@@ -112,6 +127,11 @@ if (existsSync(testFile)) {
     if (!out.includes("const findLinkWithText =")) {
       const marker = "\n// Find the innermost element whose own (direct) text content includes the";
       out = out.replace(marker, `\n${findLinkHelper()}\n${marker.trimStart()}`);
+    }
+
+    if (!out.includes("const rowTextAndLinks =")) {
+      const marker = "\nconst baseProps = {";
+      out = out.replace(marker, `\n${rowTextAndLinksHelper()}\n${marker.trimStart()}`);
     }
 
     return out;
@@ -158,6 +178,10 @@ function tickerHelpers() {
     "  url: string",
     "}",
     "",
+    "type KickbacksAdClickEvent = {",
+    "  stopImmediatePropagation: () => void",
+    "}",
+    "",
     "const cleanAdText = (value: unknown): string => {",
     "  if (typeof value !== 'string') {",
     "    return ''",
@@ -201,8 +225,24 @@ function tickerHelpers() {
     "  }",
     "}",
     "",
-    "export function KickbacksTickerAdText({ ad }: { ad: KickbacksTickerAd }) {",
-    "  return <Link url={ad.url}>{ad.text}</Link>",
+    "export function KickbacksTickerAdText({",
+    "  ad,",
+    "  onOpen = openExternalUrl",
+    "}: {",
+    "  ad: KickbacksTickerAd",
+    "  onOpen?: (url: string) => boolean",
+    "}) {",
+    "  return (",
+    "    <Box",
+    "      flexDirection=\"row\"",
+    "      onClick={(event: KickbacksAdClickEvent) => {",
+    "        event.stopImmediatePropagation()",
+    "        onOpen(ad.url)",
+    "      }}",
+    "    >",
+    "      <Link url={ad.url}>{ad.text}</Link>",
+    "    </Box>",
+    "  )",
     "}",
   ].join("\n");
 }
@@ -235,6 +275,34 @@ function findLinkHelper() {
     "  }",
     "",
     "  return findLinkWithText(node.props.children, needle)",
+    "}",
+  ].join("\n");
+}
+
+function rowTextAndLinksHelper() {
+  return [
+    "const rowTextAndLinks = (node: React.ReactElement, width = 100): { links: string[]; text: string } => {",
+    "  const { screen } = renderToScreen(node, width)",
+    "  let text = ''",
+    "  const links: string[] = []",
+    "",
+    "  for (let row = 0; row < screen.height; row++) {",
+    "    for (let col = 0; col < screen.width; col++) {",
+    "      const cell = cellAt(screen, col, row)",
+    "",
+    "      if (!cell) {",
+    "        continue",
+    "      }",
+    "",
+    "      text += cell.char",
+    "",
+    "      if (cell.hyperlink) {",
+    "        links.push(`${cell.char}:${cell.hyperlink}`)",
+    "      }",
+    "    }",
+    "  }",
+    "",
+    "  return { links, text }",
     "}",
   ].join("\n");
 }
@@ -272,6 +340,44 @@ function tickerTests() {
     "      text: 'Ito AI, someone has to test this slop',",
     "      url: 'https://kickbacks.ai/click'",
     "    })",
+    "  })",
+    "",
+    "  it('opens the ad click URL from the TUI click target', () => {",
+    "    const open = vi.fn(() => true)",
+    "    const element = KickbacksTickerAdText({",
+    "      ad: {",
+    "        text: 'Ito AI, someone has to test this slop',",
+    "        url: 'https://kickbacks.ai/click'",
+    "      },",
+    "      onOpen: open",
+    "    })",
+    "",
+    "    expect(typeof element.props.onClick).toBe('function')",
+    "",
+    "    const event = { stopImmediatePropagation: vi.fn() }",
+    "    element.props.onClick(event)",
+    "",
+    "    expect(event.stopImmediatePropagation).toHaveBeenCalledOnce()",
+    "    expect(open).toHaveBeenCalledWith('https://kickbacks.ai/click')",
+    "  })",
+    "",
+    "  it('renders the busy status ad cells with a click URL', () => {",
+    "    const now = Date.now()",
+    "    const path = writeAdCache({",
+    "      ad_text: 'Ito AI, someone has to test this slop',",
+    "      click_url: 'https://kickbacks.ai/click',",
+    "      ts: now",
+    "    })",
+    "",
+    "    process.env.KICKBACKS_HERMES_TUI_AD_CACHE = path",
+    "",
+    "    const { links, text } = rowTextAndLinks(",
+    "      <StatusRule {...baseProps} busy status=\"working\" turnStartedAt={now - 1000} />,",
+    "      100",
+    "    )",
+    "",
+    "    expect(text).toContain('Ito AI, someone has to test this slop')",
+    "    expect(links.some(link => link.endsWith(':https://kickbacks.ai/click'))).toBe(true)",
     "  })",
     "",
     "  it('renders the ad phrase as an Ink link', () => {",
