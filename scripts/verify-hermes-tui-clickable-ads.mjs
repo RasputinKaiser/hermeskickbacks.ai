@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -30,6 +30,7 @@ const failures = [];
 checkActiveHermesCommand();
 checkFile("source", source, required);
 checkFile("built bundle", built, required);
+checkBuiltBundleFresh();
 
 if (runTests) {
   run("TUI status-row link tests", "npm", [
@@ -62,6 +63,19 @@ function checkFile(label, file, needles) {
     if (!text.includes(needle)) {
       failures.push(`${label} missing ${needle}`);
     }
+  }
+}
+
+function checkBuiltBundleFresh() {
+  if (!existsSync(source) || !existsSync(built)) {
+    return;
+  }
+
+  const sourceMtime = statSync(source).mtimeMs;
+  const builtMtime = statSync(built).mtimeMs;
+
+  if (builtMtime + 1000 < sourceMtime) {
+    failures.push("built TUI bundle is older than appChrome source; run npm run hermes:tui-links");
   }
 }
 
