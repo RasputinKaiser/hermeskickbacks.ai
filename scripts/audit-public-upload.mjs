@@ -7,6 +7,7 @@ const repo = "hermeskickbacks.ai";
 const remoteRef = process.argv.find((arg) => arg.startsWith("--ref="))?.slice("--ref=".length) || "origin/main";
 const skipFetch = process.argv.includes("--no-fetch");
 const skipGithub = process.argv.includes("--no-github");
+const skipUpstream = process.argv.includes("--no-upstream");
 const blocked = [
   String.fromCharCode(105, 97, 110),
   String.fromCharCode(105, 97, 110, 122, 118, 105, 114, 98, 117, 108, 105, 115),
@@ -17,6 +18,11 @@ const failures = [];
 
 if (!skipFetch && remoteRef === "origin/main") {
   run(["fetch", "origin", "main"], "fetch origin/main");
+}
+
+if (!skipFetch && !skipUpstream && remoteRef === "origin/main") {
+  run(["fetch", "upstream", "main"], "fetch upstream/main");
+  checkUpstreamCurrent();
 }
 
 for (const term of blocked) {
@@ -100,6 +106,16 @@ function scanGit(args, label) {
     failures.push(`${label}\n${result.stdout.trim()}`);
   } else if (result.status !== 1) {
     failures.push(`${label} scan failed: ${result.stderr || result.stdout}`.trim());
+  }
+}
+
+function checkUpstreamCurrent() {
+  const counts = git(["rev-list", "--left-right", "--count", "origin/main...upstream/main"], "compare upstream");
+  const [aheadText, missingText] = counts.trim().split(/\s+/);
+  const missing = Number.parseInt(missingText || "0", 10);
+
+  if (Number.isFinite(missing) && missing > 0) {
+    failures.push(`origin/main is missing ${missing} upstream commit(s)`);
   }
 }
 
