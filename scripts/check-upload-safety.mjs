@@ -10,6 +10,14 @@ const blocked = [
 
 const hits = [];
 
+for (const field of ["user.name", "user.email"]) {
+  const value = gitConfig(field).toLowerCase();
+
+  if (blocked.some((term) => value.includes(term))) {
+    hits.push(`git config ${field}`);
+  }
+}
+
 for (const term of blocked) {
   const content = spawnSync("git", ["grep", "-n", "-I", "-i", "-F", term, "--", "."], {
     cwd: root,
@@ -42,3 +50,16 @@ if (hits.length) {
 }
 
 console.log("Upload safety gate OK");
+
+function gitConfig(field) {
+  const result = spawnSync("git", ["config", "--get", field], {
+    cwd: root,
+    encoding: "utf8",
+  });
+
+  if (result.status === 0) {
+    return result.stdout.trim();
+  }
+
+  return "";
+}
