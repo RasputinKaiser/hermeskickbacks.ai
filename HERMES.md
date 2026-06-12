@@ -46,6 +46,7 @@ Useful command forms:
 npm run hermes:status
 npm run hermes:check
 npm run hermes:verify
+npm run hermes:tui-links
 node scripts/install-hermes-plugin.mjs --dry-run
 node scripts/install-hermes-plugin.mjs --check
 node scripts/install-hermes-plugin.mjs --status --json
@@ -55,6 +56,12 @@ node scripts/install-hermes-plugin.mjs --target /path/to/profile/plugins/kickbac
 
 Restart active Hermes sessions after install so the updated plugin module is
 imported.
+
+`npm run hermes:tui-links` patches the local Hermes Ink TUI so the busy
+status-row sponsored phrase is read from `~/.kickbacks/hermes-ad.json` and
+rendered as a clickable Ink link using the ad's `click_url`. This is live TUI
+source/build integration; it is separate from backend metric acceptance,
+earnings movement, payout settlement, and a human-recorded click proof.
 
 ## Runtime Contract
 

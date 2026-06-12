@@ -25,6 +25,21 @@ check("required Hermes plugin files exist", () => {
   }
 });
 
+check("Hermes upload and TUI link scripts are wired", () => {
+  const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  assert(pkg.scripts?.["upload:safety"] === "node scripts/check-upload-safety.mjs", "missing upload safety script");
+  assert(
+    pkg.scripts?.["hermes:tui-links"] === "node scripts/patch-hermes-tui-clickable-ads.mjs",
+    "missing Hermes TUI link patch script",
+  );
+  assert(
+    pkg.scripts?.["hermes:verify"]?.startsWith("npm run upload:safety &&"),
+    "Hermes verify should run upload safety first",
+  );
+  assert(existsSync(join(root, "scripts", "check-upload-safety.mjs")), "missing upload safety checker");
+  assert(existsSync(join(root, "scripts", "patch-hermes-tui-clickable-ads.mjs")), "missing TUI link patcher");
+});
+
 check("generated Python caches are not vendored", () => {
   const files = trackedPluginFiles();
   assert(!files.some((file) => file.includes("__pycache__")), "tracked __pycache__");
