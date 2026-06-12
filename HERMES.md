@@ -34,6 +34,8 @@ Add `--receipt <path>` to any install/status/check command to write the same
 comparison as JSON for automation logs. Receipts include deterministic
 `sourceDigest` and `targetDigest` values over the copied file set; matching
 digests prove source/target file parity for the installer scope.
+For destructive install operations, source and target must be different
+`kickbacks` directories and may not be nested inside each other.
 
 Useful variants:
 

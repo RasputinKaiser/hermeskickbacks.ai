@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const args = parseArgs(process.argv.slice(2));
@@ -30,6 +30,7 @@ main();
 
 function main() {
   assertSource(source);
+  assertSafePaths(source, target);
 
   const comparison = compareTrees(source, target);
   const sourceVersion = readPluginVersion(source);
@@ -116,6 +117,38 @@ function assertSource(dir) {
       process.exit(1);
     }
   }
+}
+
+function assertSafePaths(sourceDir, targetDir) {
+  if (basename(sourceDir) !== "kickbacks") {
+    fail(`Hermes plugin source must be a kickbacks directory: ${sourceDir}`);
+  }
+  if (basename(targetDir) !== "kickbacks") {
+    fail(`Hermes plugin target must be a kickbacks directory: ${targetDir}`);
+  }
+  if (samePath(sourceDir, targetDir)) {
+    fail("source and target must be different directories");
+  }
+  if (isInside(targetDir, sourceDir)) {
+    fail("target must not be inside the source directory");
+  }
+  if (isInside(sourceDir, targetDir)) {
+    fail("source must not be inside the target directory");
+  }
+}
+
+function samePath(left, right) {
+  return relative(left, right) === "";
+}
+
+function isInside(child, parent) {
+  const rel = relative(parent, child);
+  return rel !== "" && !rel.startsWith("..") && !isAbsolute(rel);
+}
+
+function fail(message) {
+  console.error(message);
+  process.exit(1);
 }
 
 function compareTrees(leftRoot, rightRoot) {

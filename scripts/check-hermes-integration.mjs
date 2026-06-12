@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -70,6 +70,38 @@ check("installer status detects missing target", () => {
     assert(output.includes("current: no"), "status did not report stale target");
     assert(output.includes("target=missing"), "status did not report missing version");
     assert(output.includes("missing:"), "status did not list missing files");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+check("installer rejects unsafe source and target layouts", () => {
+  const same = runInstallerExpectFailure([
+    "--status",
+    "--source",
+    plugin,
+    "--target",
+    plugin,
+  ]);
+  assert(same.stderr.includes("source and target must be different"), "same source/target should fail");
+
+  const nestedTarget = runInstallerExpectFailure([
+    "--status",
+    "--source",
+    plugin,
+    "--target",
+    join(plugin, "nested", "kickbacks"),
+  ]);
+  assert(nestedTarget.stderr.includes("target must not be inside"), "target inside source should fail");
+
+  const tmp = mkdtempSync(join(tmpdir(), "kickbacks-hermes-unsafe-"));
+  try {
+    const badName = runInstallerExpectFailure([
+      "--status",
+      "--target",
+      join(tmp, "not-kickbacks"),
+    ]);
+    assert(badName.stderr.includes("target must be a kickbacks directory"), "bad target name should fail");
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -202,6 +234,20 @@ function check(name, fn) {
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
+}
+
+function runInstallerExpectFailure(args) {
+  const result = spawnSync("node", [installer, ...args], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  if (result.status === 0) {
+    throw new Error(`installer unexpectedly passed: ${args.join(" ")}`);
+  }
+  return {
+    stdout: result.stdout || "",
+    stderr: result.stderr || "",
+  };
 }
 
 function walk(dir) {
