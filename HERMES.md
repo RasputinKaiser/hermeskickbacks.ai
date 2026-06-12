@@ -71,6 +71,13 @@ proof.
 `npm run hermes:tui-verify` checks that the local Hermes TUI source and built
 bundle still contain the status-row link and direct click paths, then runs the
 focused TUI tests and typecheck.
+Add `-- --receipt <path>` to archive a machine-readable local TUI click-layer
+receipt after those checks pass, for example:
+
+```bash
+npm run hermes:tui-verify -- --receipt /tmp/hermes-tui-click-proof.json
+```
+
 After commit `9f391d6ee3ada9fb7148e1ac8be6143ed91fd693`, a live Hermes TUI
 session opened a status-row ad phrase from the running `hermes` command. Treat
 that as local TUI click proof only; backend metric acceptance, earnings

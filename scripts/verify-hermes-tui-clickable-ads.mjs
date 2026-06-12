@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 const home = process.env.HOME || homedir();
 const tuiRoot = process.env.HERMES_TUI_ROOT || join(home, ".hermes", "hermes-agent", "ui-tui");
@@ -26,6 +26,10 @@ const required = [
 ];
 
 const failures = [];
+const receiptPath = readReceiptPath();
+let activeCommandPath = "";
+let sourceMtimeMs = null;
+let builtMtimeMs = null;
 
 checkActiveHermesCommand();
 checkFile("source", source, required);
@@ -50,6 +54,10 @@ if (failures.length) {
   process.exit(1);
 }
 
+if (receiptPath) {
+  writeReceipt(receiptPath);
+}
+
 console.log("Hermes TUI clickable ad verification OK");
 
 function checkFile(label, file, needles) {
@@ -71,10 +79,10 @@ function checkBuiltBundleFresh() {
     return;
   }
 
-  const sourceMtime = statSync(source).mtimeMs;
-  const builtMtime = statSync(built).mtimeMs;
+  sourceMtimeMs = statSync(source).mtimeMs;
+  builtMtimeMs = statSync(built).mtimeMs;
 
-  if (builtMtime + 1000 < sourceMtime) {
+  if (builtMtimeMs + 1000 < sourceMtimeMs) {
     failures.push("built TUI bundle is older than appChrome source; run npm run hermes:tui-links");
   }
 }
@@ -119,4 +127,57 @@ function checkActiveHermesCommand() {
   if (!shim.includes(hermesVenvBin)) {
     failures.push(`hermes command does not exec checked local install: ${commandPath}`);
   }
+
+  activeCommandPath = commandPath;
+}
+
+function readReceiptPath() {
+  const index = process.argv.indexOf("--receipt");
+  if (index === -1) return "";
+
+  const value = process.argv[index + 1];
+  if (!value || value.startsWith("--")) {
+    failures.push("--receipt requires a path");
+    return "";
+  }
+
+  return resolve(value);
+}
+
+function writeReceipt(file) {
+  const receipt = {
+    schemaVersion: 1,
+    surface: "hermes-tui",
+    proofLayer: "local-tui-click",
+    proofBoundary:
+      "local TUI source, built bundle, active hermes command path, and tests only; not backend metric acceptance, earnings movement, or payout settlement",
+    generatedAt: new Date().toISOString(),
+    tuiRoot: redactHome(tuiRoot),
+    source: {
+      path: redactHome(source),
+      mtimeMs: sourceMtimeMs,
+    },
+    built: {
+      path: redactHome(built),
+      mtimeMs: builtMtimeMs,
+    },
+    activeCommandPath: redactHome(activeCommandPath),
+    checks: {
+      requiredMarkers: required,
+      bundleFresh: true,
+      activeCommand: true,
+    },
+    testsRun: runTests,
+  };
+
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(receipt, null, 2)}\n`);
+  console.log(`receipt: ${file}`);
+}
+
+function redactHome(value) {
+  if (!value) return value;
+  if (value === home) return "~";
+  if (value.startsWith(`${home}/`)) return `~/${value.slice(home.length + 1)}`;
+  return value;
 }
