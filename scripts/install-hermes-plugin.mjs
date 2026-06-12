@@ -25,6 +25,9 @@ const force = Boolean(args.force);
 const backup = !Boolean(args["no-backup"] || args.noBackup);
 const json = Boolean(args.json);
 const receiptPath = args.receipt ? resolve(String(args.receipt)) : "";
+const RECEIPT_SCHEMA_VERSION = 1;
+const PROOF_LAYER = "hermes-plugin-file-parity";
+const PROOF_BOUNDARY = "Installer file parity only; not runtime visibility, backend metric acceptance, earnings movement, or payout settlement proof.";
 
 main();
 
@@ -240,8 +243,12 @@ function readPluginVersion(root) {
 
 function printStatus({ comparison, sourceVersion, targetVersion }) {
   const payload = {
+    schemaVersion: RECEIPT_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     mode: statusOnly ? "status" : checkOnly ? "check" : dryRun ? "dry-run" : "install",
+    surface: "hermes",
+    proofLayer: PROOF_LAYER,
+    proofBoundary: PROOF_BOUNDARY,
     source,
     target,
     sourceVersion,

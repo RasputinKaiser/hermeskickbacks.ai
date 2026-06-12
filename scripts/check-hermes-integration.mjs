@@ -145,6 +145,10 @@ check("installer JSON status is machine-readable", () => {
       join(tmp, "kickbacks"),
     ], { encoding: "utf8" });
     const status = JSON.parse(output);
+    assert(status.schemaVersion === 1, "JSON status should expose schemaVersion");
+    assert(status.surface === "hermes", "JSON status should expose Hermes surface");
+    assert(status.proofLayer === "hermes-plugin-file-parity", "JSON status should expose proof layer");
+    assert(status.proofBoundary.includes("not runtime visibility"), "JSON status should expose proof boundary");
     assert(status.current === false, "JSON status should expose current=false");
     assert(Array.isArray(status.missing), "JSON status should expose missing array");
     assert(Array.isArray(status.extra), "JSON status should expose extra array");
@@ -169,6 +173,10 @@ check("installer can write a machine-readable receipt", () => {
     ], { encoding: "utf8" });
     const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
     assert(output.includes(`receipt: ${receiptPath}`), "status output should name receipt path");
+    assert(receipt.schemaVersion === 1, "receipt should include schemaVersion");
+    assert(receipt.surface === "hermes", "receipt should include Hermes surface");
+    assert(receipt.proofLayer === "hermes-plugin-file-parity", "receipt should include proof layer");
+    assert(receipt.proofBoundary.includes("not runtime visibility"), "receipt should include proof boundary");
     assert(receipt.mode === "status", "receipt should include status mode");
     assert(receipt.current === false, "receipt should expose current=false");
     assert(Array.isArray(receipt.missing), "receipt should expose missing array");

@@ -34,6 +34,9 @@ Add `--receipt <path>` to any install/status/check command to write the same
 comparison as JSON for automation logs. Receipts include deterministic
 `sourceDigest` and `targetDigest` values over the copied file set; matching
 digests prove source/target file parity for the installer scope.
+Receipts also include `proofLayer: "hermes-plugin-file-parity"` and a
+`proofBoundary` that explicitly says they are not runtime, metric, earnings, or
+payout proof.
 For destructive install operations, source and target must be different
 `kickbacks` directories and may not be nested inside each other.
 
