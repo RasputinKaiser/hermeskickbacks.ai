@@ -8,6 +8,8 @@ const home = process.env.HOME || homedir();
 const tuiRoot = process.env.HERMES_TUI_ROOT || join(home, ".hermes", "hermes-agent", "ui-tui");
 const source = join(tuiRoot, "src", "components", "appChrome.tsx");
 const built = join(tuiRoot, "dist", "entry.js");
+const hermesAgentRoot = join(home, ".hermes", "hermes-agent");
+const hermesVenvBin = join(hermesAgentRoot, "venv", "bin", "hermes");
 const runTests = !process.argv.includes("--no-tests");
 
 const required = [
@@ -22,6 +24,7 @@ const required = [
 
 const failures = [];
 
+checkActiveHermesCommand();
 checkFile("source", source, required);
 checkFile("built bundle", built, required);
 
@@ -64,5 +67,39 @@ function run(label, cmd, args) {
     execFileSync(cmd, args, { cwd: tuiRoot, stdio: "inherit" });
   } catch (error) {
     failures.push(`${label} failed with exit ${error.status ?? 1}`);
+  }
+}
+
+function checkActiveHermesCommand() {
+  if (process.env.HERMES_TUI_DIR && process.env.HERMES_TUI_DIR !== tuiRoot) {
+    failures.push(`HERMES_TUI_DIR points away from checked TUI root: ${process.env.HERMES_TUI_DIR}`);
+  }
+
+  let commandPath = "";
+
+  try {
+    commandPath = execFileSync("bash", ["-lc", "command -v hermes"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    failures.push("hermes command not found on PATH");
+    return;
+  }
+
+  if (!commandPath) {
+    failures.push("hermes command not found on PATH");
+    return;
+  }
+
+  if (!existsSync(commandPath)) {
+    failures.push(`hermes command path missing: ${commandPath}`);
+    return;
+  }
+
+  const shim = readFileSync(commandPath, "utf8");
+
+  if (!shim.includes(hermesVenvBin)) {
+    failures.push(`hermes command does not exec checked local install: ${commandPath}`);
   }
 }
