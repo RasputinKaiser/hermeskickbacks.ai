@@ -202,6 +202,7 @@
     "upload:safety": "node scripts/check-upload-safety.mjs",
     "hermes:verify": "npm run upload:safety && npm run hermes:check && npm run hermes:test && npm run hermes:status",
     "hermes:tui-links": "node scripts/patch-hermes-tui-clickable-ads.mjs",
+    "hermes:tui-verify": "node scripts/verify-hermes-tui-clickable-ads.mjs",
     "hermes:test": "PYTHONPATH=hermes/plugins python3 -m unittest discover -s hermes/plugins/kickbacks/tests -p 'test_*.py'",
     "icon": "node scripts/gen-icon.mjs",
     "package": "node scripts/package.mjs",

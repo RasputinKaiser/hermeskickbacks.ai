@@ -47,6 +47,7 @@ npm run hermes:status
 npm run hermes:check
 npm run hermes:verify
 npm run hermes:tui-links
+npm run hermes:tui-verify
 node scripts/install-hermes-plugin.mjs --dry-run
 node scripts/install-hermes-plugin.mjs --check
 node scripts/install-hermes-plugin.mjs --status --json
@@ -62,6 +63,9 @@ status-row sponsored phrase is read from `~/.kickbacks/hermes-ad.json` and
 rendered as a clickable Ink link using the ad's `click_url`. This is live TUI
 source/build integration; it is separate from backend metric acceptance,
 earnings movement, payout settlement, and a human-recorded click proof.
+`npm run hermes:tui-verify` checks that the local Hermes TUI source and built
+bundle still contain the status-row link path, then runs the focused TUI tests
+and typecheck.
 
 ## Runtime Contract
 

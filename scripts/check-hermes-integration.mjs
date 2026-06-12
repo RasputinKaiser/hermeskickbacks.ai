@@ -33,11 +33,16 @@ check("Hermes upload and TUI link scripts are wired", () => {
     "missing Hermes TUI link patch script",
   );
   assert(
+    pkg.scripts?.["hermes:tui-verify"] === "node scripts/verify-hermes-tui-clickable-ads.mjs",
+    "missing Hermes TUI link verify script",
+  );
+  assert(
     pkg.scripts?.["hermes:verify"]?.startsWith("npm run upload:safety &&"),
     "Hermes verify should run upload safety first",
   );
   assert(existsSync(join(root, "scripts", "check-upload-safety.mjs")), "missing upload safety checker");
   assert(existsSync(join(root, "scripts", "patch-hermes-tui-clickable-ads.mjs")), "missing TUI link patcher");
+  assert(existsSync(join(root, "scripts", "verify-hermes-tui-clickable-ads.mjs")), "missing TUI link verifier");
 });
 
 check("generated Python caches are not vendored", () => {
