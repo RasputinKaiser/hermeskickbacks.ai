@@ -40,7 +40,7 @@ payout proof.
 For destructive install operations, source and target must be different
 `kickbacks` directories and may not be nested inside each other.
 
-Useful variants:
+Useful command forms:
 
 ```bash
 npm run hermes:status

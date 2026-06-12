@@ -26,6 +26,7 @@ import os
 import threading
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 from . import api
 from .tracker import ImpressionTracker
@@ -51,6 +52,17 @@ def _env_int(name: str, default: int, *, min_value: int = 0, max_value: int = 3_
 
 
 CACHE_FALLBACK_MAX_AGE_MS = _env_int("KICKBACKS_CACHE_FALLBACK_MAX_AGE_MS", 15 * 60 * 1000)
+
+
+def _markdown_link(label: str, url: str | None) -> str:
+    clean_label = api._strip_controls(label or "")
+    clean_url = api._strip_controls(url or "").strip()
+    parsed = urlparse(clean_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return clean_label
+    escaped_label = clean_label.replace("\\", "\\\\").replace("[", "\\[").replace("]", "\\]")
+    escaped_url = clean_url.replace(")", "%29").replace(" ", "%20")
+    return f"[{escaped_label}]({escaped_url})"
 
 
 # ── Plugin Register ─────────────────────────────────────────────────────────
@@ -278,7 +290,7 @@ def _handle_kickbacks_command(args: str) -> str:
     # Current ad
     status = _tracker.get_status() if _tracker else {}
     if status.get("ad_text"):
-        lines.append(f"📢 **Current ad:** {status['ad_text']}")
+        lines.append(f"📢 **Current ad:** {_markdown_link(status['ad_text'], status.get('click_url'))}")
         demo_tag = " [demo]" if status.get("demo") else ""
         lines.append(f"   Ad ID: `{status['ad_id']}`{demo_tag}")
         elapsed = status.get("elapsed_ms", 0)

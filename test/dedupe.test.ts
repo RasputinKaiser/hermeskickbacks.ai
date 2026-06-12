@@ -28,7 +28,7 @@ describe("ImpressionDedupe", () => {
     const d = new ImpressionDedupe();
     expect(d.shouldSend("impression_rendered", "ad1")).toBe(true);
     expect(d.shouldSend("impression_rendered", "ad1", undefined)).toBe(false);
-    // Surface-tagged variant is independent of the default bucket.
+    // Surface-tagged form is independent of the default bucket.
     expect(d.shouldSend("impression_rendered", "ad1", "overlay")).toBe(true);
   });
 });

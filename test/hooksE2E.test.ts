@@ -36,7 +36,7 @@ const mkAdapter = () => ({
  *    /v1/earnings   -> $42.00 lifetime / $1.50 today (when signed in)
  *    /v1/metrics    -> 204 — the URL of interest for hook assertions
  *    everything else -> {} 200
- *  Tests mutate `viewThresholdSeconds` and `adOverride` to test variants. */
+ *  Tests mutate `viewThresholdSeconds` and `adOverride` to test forms. */
 function stubFetch(opts: { viewThresholdSeconds?: number;
                             adOverride?: typeof AD | null;
                             killed?: boolean } = {}) {

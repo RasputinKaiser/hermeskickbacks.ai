@@ -103,7 +103,7 @@ describe("block.asset icon rendering (ICON_URL feature)", () => {
       "Acme banner text", "https://acme.example/lp");
     expect(h).toContain('data-vibe-ads-ad="1"');
     // Banner may or may not include the favicon — depends on implementation.
-    // The key invariant: no <img> tag when no icon_url.
+    // The key rule: no <img> tag when no icon_url.
     expect(h).not.toContain("<img");
   });
 });

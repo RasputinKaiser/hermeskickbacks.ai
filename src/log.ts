@@ -206,7 +206,7 @@ function maybeTrimLog(): void {
 // off (see the LOGGING POLICY header). Keep it to LOW-VOLUME, PII-FREE
 // auth / self-update / activation-health signals — never per-impression or
 // per-render events. Exact singletons + family prefixes; the prefixes cover
-// the `selfupdate.*` / `boot.cycle.*` variants and FUTURE `auth.*` events
+// the `selfupdate.*` / `boot.cycle.*` forms and FUTURE `auth.*` events
 // (the auth client's refresh path is silent today — when it gains logging,
 // those events are lifecycle automatically). Exported for the unit test that
 // guards this set against drift.

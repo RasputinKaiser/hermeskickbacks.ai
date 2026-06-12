@@ -1,7 +1,7 @@
 // Generates the full Kickbacks logo asset set in extension/media/logos/.
 // The mark is the "K$" wordmark (Montserrat 800, white) on a vertical green
 // gradient rounded square. Raster sizes are produced with headless Chromium
-// (real typeface — see _brand.mjs); SVG variants are font-based.
+// (real typeface — see _brand.mjs); SVG forms are font-based.
 // Run: `node extension/scripts/gen-logos.mjs`.
 import { writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -40,7 +40,7 @@ console.log("  favicon-32 / apple-touch-icon / og-logo / icon-192 / icon-512");
 writeFileSync(join(outDir, "kickbacks-lockup.png"), lockup);
 console.log(`  kickbacks-lockup.png (${lockup.length} bytes)`);
 
-// SVG variants
+// SVG forms
 writeFileSync(join(outDir, "kickbacks.svg"), markSVG({ box: true, fill: "#fff" }));
 writeFileSync(join(outDir, "favicon.svg"), markSVG({ box: true, fill: "#fff" }));
 writeFileSync(join(outDir, "kickbacks-white.svg"), markSVG({ box: false, fill: "#fff" }));

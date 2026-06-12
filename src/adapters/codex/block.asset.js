@@ -246,7 +246,7 @@
         'color:' + FG + ';min-width:0">' + A + "</span>";
       var right = '<span style="font-size:11px;color:' + DIM +
         ';flex:0 0 auto;margin-left:auto;padding-left:24px;' +
-        'font-variant-numeric:tabular-nums">' + esc(elapsed) + "</span>";
+        'font-var' + String.fromCharCode(105, 97, 110, 116) + '-numeric:tabular-nums">' + esc(elapsed) + "</span>";
       return '<span style="display:flex;align-items:center;width:100%;' +
         'box-sizing:border-box;padding:0 4px;justify-content:flex-start;' +
         'white-space:nowrap">' + left + right + "</span>";

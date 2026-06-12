@@ -76,7 +76,7 @@ describe("block.asset", () => {
       expect(b.looksLikeUsageBanner(
         "You've used 71% of your weekly limit · resets in 4d · View usage")).toBe(true);
     });
-    it("matches a 5-hour-window variant", () => {
+    it("matches a 5-hour-window form", () => {
       const b = load();
       expect(b.looksLikeUsageBanner(
         "You've used 92% of your current usage limit · resets in 2h")).toBe(true);

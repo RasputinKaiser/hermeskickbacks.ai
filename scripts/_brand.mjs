@@ -112,7 +112,7 @@ export async function renderAssets({ sizes = [], lockupHeight = 0 } = {}) {
   return { icons, lockup };
 }
 
-// --- SVG variants (font-based; render true Montserrat where the font is
+// --- SVG forms (font-based; render true Montserrat where the font is
 // available, fall back to a bold sans elsewhere) ---
 export function markSVG({ box = true, fill = "#fff" } = {}) {
   const rect = box

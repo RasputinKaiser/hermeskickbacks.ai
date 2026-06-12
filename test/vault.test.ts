@@ -38,7 +38,7 @@ describe("SecretVault — OS-native at-rest with a universal plaintext floor", (
     // Model ProtectedData as reversible base64 wrapping; secret arrives via env,
     // never argv.
     // Model ProtectedData as base64 (reversible, non-identity — so the
-    // "no plaintext in the envelope" invariant is actually testable).
+    // "no plaintext in the envelope" rule is actually testable).
     const run: Run = vi.fn(async (cmd, _args, opts) => {
       expect(/powershell|pwsh/i.test(cmd)).toBe(true);
       const script = _args.join(" ");

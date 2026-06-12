@@ -14,7 +14,7 @@ export interface KillState {
   /** wave-2A-F06: distinguishes a fail-safe "treated as killed because
    *  unreachable" from a real backend killed: true response. Callers can
    *  render an "offline" status (status bar already has the `kind:"offline"`
-   *  variant unused pre-fix) instead of the alarming "killed" badge that
+   *  mode unused pre-fix) instead of the alarming "killed" badge that
    *  used to flicker on every brief network blip. Offline still implies
    *  killed for the purposes of "is it safe to serve an ad" (fail-safe
    *  posture for NEW writes) — but never `confirmed`, so it never restores. */

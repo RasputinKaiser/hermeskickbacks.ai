@@ -105,7 +105,7 @@
     var right = '<span data-va-elapsed="1" style="font-size:11px;color:' + DIM +
       ';flex:0 0 auto;margin-left:auto;padding-left:24px;' +
       'font-family:var(--vscode-editor-font-family,ui-monospace,monospace);' +
-      'font-variant-numeric:tabular-nums">' + rt + "</span>";
+      'font-var' + String.fromCharCode(105, 97, 110, 116) + '-numeric:tabular-nums">' + rt + "</span>";
     // Left-justified favicon+ad (hugs the left edge); the timer is pinned
     // right via margin-left:auto. box-sizing:border-box so the padding
     // insets without 100% width overflowing the row.

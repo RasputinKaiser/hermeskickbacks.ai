@@ -372,6 +372,7 @@ class ImpressionTracker:
                 "elapsed_ms": elapsed,
                 "ad_id": self._ad.ad_id if self._ad else None,
                 "ad_text": self._ad.ad_text if self._ad else None,
+                "click_url": self._ad.click_url if self._ad else None,
                 "corr": self._corr,
                 "demo": self._ad.demo if self._ad else False,
                 "session_nonce": self._session_nonce,
