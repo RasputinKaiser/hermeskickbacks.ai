@@ -116,6 +116,8 @@ check("installer JSON status is machine-readable", () => {
     assert(status.current === false, "JSON status should expose current=false");
     assert(Array.isArray(status.missing), "JSON status should expose missing array");
     assert(Array.isArray(status.extra), "JSON status should expose extra array");
+    assert(typeof status.sourceDigest === "string", "JSON status should expose sourceDigest");
+    assert(typeof status.targetDigest === "string", "JSON status should expose targetDigest");
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -138,7 +140,46 @@ check("installer can write a machine-readable receipt", () => {
     assert(receipt.mode === "status", "receipt should include status mode");
     assert(receipt.current === false, "receipt should expose current=false");
     assert(Array.isArray(receipt.missing), "receipt should expose missing array");
+    assert(typeof receipt.sourceDigest === "string", "receipt should include sourceDigest");
+    assert(typeof receipt.targetDigest === "string", "receipt should include targetDigest");
     assert(receipt.generatedAt, "receipt should include generatedAt");
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+check("installer digests prove exact file parity and drift", () => {
+  const tmp = mkdtempSync(join(tmpdir(), "kickbacks-hermes-digest-"));
+  try {
+    const target = join(tmp, "kickbacks");
+    execFileSync("node", [
+      installer,
+      "--target",
+      target,
+      "--no-backup",
+    ], { encoding: "utf8" });
+
+    const current = JSON.parse(execFileSync("node", [
+      installer,
+      "--status",
+      "--json",
+      "--target",
+      target,
+    ], { encoding: "utf8" }));
+    assert(current.current === true, "fresh install should be current");
+    assert(current.sourceDigest === current.targetDigest, "fresh install digests should match");
+
+    writeFileSync(join(target, "plugin.yaml"), "name: stale\nversion: stale\n", "utf8");
+    const stale = JSON.parse(execFileSync("node", [
+      installer,
+      "--status",
+      "--json",
+      "--target",
+      target,
+    ], { encoding: "utf8" }));
+    assert(stale.current === false, "changed target should not be current");
+    assert(stale.sourceDigest !== stale.targetDigest, "changed target digest should differ");
+    assert(stale.changed.includes("plugin.yaml"), "changed target should name plugin.yaml");
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

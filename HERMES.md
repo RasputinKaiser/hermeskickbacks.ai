@@ -31,7 +31,9 @@ exists, it creates a timestamped backup next to the target before replacing it.
 Status compares missing, changed, and extra target files so stale local plugin
 files cannot hide behind a green file-count check.
 Add `--receipt <path>` to any install/status/check command to write the same
-comparison as JSON for automation logs.
+comparison as JSON for automation logs. Receipts include deterministic
+`sourceDigest` and `targetDigest` values over the copied file set; matching
+digests prove source/target file parity for the installer scope.
 
 Useful variants:
 
@@ -72,7 +74,8 @@ new backend fetch.
 ## Proof Boundaries
 
 - Installed plugin: file match from this fork to `~/.hermes/plugins/kickbacks`.
-- Installer receipt: machine-readable file-parity evidence for automation.
+- Installer receipt: machine-readable file-parity evidence for automation,
+  including deterministic source and target digests.
 - Visible runtime: real Hermes output containing Kickbacks plugin activity.
 - Collection: accepted `impression_rendered`, `view_tick`, or
   `view_threshold_met` metrics.

@@ -138,6 +138,8 @@ function compareTrees(leftRoot, rightRoot) {
     current: missing.length === 0 && changed.length === 0 && extra.length === 0,
     sourceFiles: left.size,
     targetFiles: right.size,
+    sourceDigest: digestTree(left),
+    targetDigest: digestTree(right),
     missing,
     changed,
     extra,
@@ -152,6 +154,17 @@ function fingerprintTree(root) {
     out.set(rel, createHash("sha256").update(readFileSync(file)).digest("hex"));
   }
   return out;
+}
+
+function digestTree(files) {
+  const h = createHash("sha256");
+  for (const [file, digest] of [...files.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    h.update(file);
+    h.update("\0");
+    h.update(digest);
+    h.update("\0");
+  }
+  return h.digest("hex");
 }
 
 function walk(dir) {
@@ -203,6 +216,8 @@ function printStatus({ comparison, sourceVersion, targetVersion }) {
     current: comparison.current,
     sourceFiles: comparison.sourceFiles,
     targetFiles: comparison.targetFiles,
+    sourceDigest: comparison.sourceDigest,
+    targetDigest: comparison.targetDigest,
     missing: comparison.missing,
     changed: comparison.changed,
     extra: comparison.extra,
@@ -217,6 +232,7 @@ function printStatus({ comparison, sourceVersion, targetVersion }) {
   console.log(`version: source=${sourceVersion} target=${targetVersion}`);
   console.log(`current: ${comparison.current ? "yes" : "no"}`);
   console.log(`files: source=${comparison.sourceFiles} target=${comparison.targetFiles}`);
+  console.log(`digest: source=${comparison.sourceDigest} target=${comparison.targetDigest}`);
   if (comparison.missing.length) console.log(`missing: ${comparison.missing.join(", ")}`);
   if (comparison.changed.length) console.log(`changed: ${comparison.changed.join(", ")}`);
   if (comparison.extra.length) console.log(`extra: ${comparison.extra.join(", ")}`);
