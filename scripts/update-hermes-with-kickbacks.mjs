@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,9 +14,13 @@ const skipVerify = process.argv.includes("--skip-verify");
 const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 const backupDir = join(backupRoot, stamp);
 
-const failures = [];
-
-main();
+try {
+  main();
+} catch (error) {
+  console.error("Hermes update/reapply failed:");
+  console.error(`- ${error.message}`);
+  process.exit(1);
+}
 
 function main() {
   requireGitCheckout();
@@ -25,7 +29,7 @@ function main() {
   writeText("pre-head.txt", git(["rev-parse", "HEAD"]));
   writeText("pre-update-state.txt", git(["rev-list", "--left-right", "--count", "HEAD...origin/main"], { optional: true }));
   writeText("local.patch", git(["diff"], { optional: true }));
-  writeText("untracked-files.txt", git(["ls-files", "-o", "--exclude-standard"], { optional: true }));
+  backupUntrackedFiles();
 
   const stashName = `kickbacks-before-hermes-update-${stamp}`;
   const hadLocalChanges = git(["status", "--porcelain"]).trim().length > 0;
@@ -53,12 +57,6 @@ function main() {
     writeText("stash-kept.txt", `stash left in place: ${stashName}\n`);
   }
 
-  if (failures.length) {
-    console.error("Hermes update/reapply failed:");
-    for (const failure of failures) console.error(`- ${failure}`);
-    process.exit(1);
-  }
-
   console.log(`Hermes update/reapply OK; backup: ${backupDir}`);
 }
 
@@ -77,7 +75,7 @@ function run(label, cmd, args, options = {}) {
   });
 
   if (result.status !== 0) {
-    failures.push(`${label} failed with exit ${result.status ?? 1}`);
+    throw new Error(`${label} failed with exit ${result.status ?? 1}`);
   }
 }
 
@@ -98,4 +96,21 @@ function git(args, options = {}) {
 
 function writeText(name, text) {
   writeFileSync(join(backupDir, name), text, "utf8");
+}
+
+function backupUntrackedFiles() {
+  const output = git(["ls-files", "-o", "--exclude-standard"], { optional: true });
+  writeText("untracked-files.txt", output);
+
+  const files = output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const file of files) {
+    const source = join(agentRoot, file);
+    const target = join(backupDir, "untracked", file);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(source, target);
+  }
 }
