@@ -26,27 +26,37 @@ afterEach(() => { process.env = { ...ENV }; });
 
 describe("registry.discover", () => {
   it("neither present -> empty", () => {
+    process.env.KICKBACKS_CC_TARGET = "/nope";
     process.env.VIBE_ADS_CC_TARGET = "/nope";
+    process.env.KICKBACKS_CODEX_TARGET = "/nope";
     process.env.VIBE_ADS_CODEX_TARGET = "/nope";
     expect(discover().length).toBe(0);
   });
   it("CC only", () => {
+    process.env.KICKBACKS_CC_TARGET = ccTarget();
     process.env.VIBE_ADS_CC_TARGET = ccTarget();
+    process.env.KICKBACKS_CODEX_TARGET = "/nope";
     process.env.VIBE_ADS_CODEX_TARGET = "/nope";
     expect(discover().map((x) => x.id)).toEqual(["claude-code"]);
   });
   it("Codex only", () => {
+    process.env.KICKBACKS_CC_TARGET = "/nope";
     process.env.VIBE_ADS_CC_TARGET = "/nope";
+    process.env.KICKBACKS_CODEX_TARGET = codexTarget();
     process.env.VIBE_ADS_CODEX_TARGET = codexTarget();
     expect(discover().map((x) => x.id)).toEqual(["codex"]);
   });
   it("both -> claude-code first (primary precedence)", () => {
+    process.env.KICKBACKS_CC_TARGET = ccTarget();
     process.env.VIBE_ADS_CC_TARGET = ccTarget();
+    process.env.KICKBACKS_CODEX_TARGET = codexTarget();
     process.env.VIBE_ADS_CODEX_TARGET = codexTarget();
     expect(discover().map((x) => x.id)).toEqual(["claude-code", "codex"]);
   });
   it("adapters are constructed and typed", () => {
+    process.env.KICKBACKS_CC_TARGET = ccTarget();
     process.env.VIBE_ADS_CC_TARGET = ccTarget();
+    process.env.KICKBACKS_CODEX_TARGET = codexTarget();
     process.env.VIBE_ADS_CODEX_TARGET = codexTarget();
     const d = discover();
     expect(d.find((x) => x.id === "codex")!.adapter.name).toBe("codex");
