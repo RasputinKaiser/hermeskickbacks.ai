@@ -116,6 +116,14 @@ check("Hermes upload and TUI link scripts are wired", () => {
   assert(existsSync(join(root, "scripts", "write-hermes-local-proof.mjs")), "missing local proof receipt writer");
   assert(existsSync(join(root, "scripts", "update-hermes-with-kickbacks.mjs")), "missing safe Hermes updater");
 
+  const publicAudit = readFileSync(join(root, "scripts", "audit-public-upload.mjs"), "utf8");
+  assert(
+    publicAudit.includes("freshAuditRepo") &&
+      publicAudit.includes("git\", [\"clone\", \"--no-checkout\"") &&
+      publicAudit.includes("remote\", \"add\", \"upstream\""),
+    "public upload audit should use a fresh remote clone by default",
+  );
+
   const safeUpdater = readFileSync(join(root, "scripts", "update-hermes-with-kickbacks.mjs"), "utf8");
   assert(
     safeUpdater.includes("\"hermes:install\"") &&
