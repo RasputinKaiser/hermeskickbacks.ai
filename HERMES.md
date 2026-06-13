@@ -52,6 +52,7 @@ npm run hermes:tui-verify
 npm run hermes:cli-links
 npm run hermes:cli-verify
 npm run hermes:patch-audit
+npm run hermes:proof -- --receipt /tmp/hermes-local-proof.json
 npm run hermes:update-safe
 npm run upload:audit-public
 node scripts/install-hermes-plugin.mjs --dry-run
@@ -87,6 +88,13 @@ session opened a status-row ad phrase from the running `hermes` command. Treat
 that as local TUI click proof only; backend metric acceptance, earnings
 movement, and payout settlement remain separate proof layers.
 
+The plugin also exposes `/kickbacks-click`. That command records a local
+`click` metric for the current ad through the Hermes plugin tracker and returns
+the ad as a safe Markdown link. This proves the plugin-owned slash-command
+click path and event-shape tests; TUI/classic CLI direct hyperlink click
+telemetry, backend metric acceptance, earnings movement, and payout settlement
+remain separate proof layers.
+
 `npm run hermes:cli-links` patches the local Hermes classic `--cli`
 prompt_toolkit spinner so the same sponsored phrase is wrapped in an OSC 8
 terminal hyperlink when the cached ad has a safe `http(s)` `click_url`.
@@ -118,6 +126,12 @@ TUI and classic CLI link patches, and runs `hermes:full-verify`. Use
 `origin/main` and that its local dirty file set is exactly the expected
 Kickbacks TUI/classic CLI patch surface. It should pass after reapplying the
 patches; extra dirty Hermes files are treated as drift.
+
+`npm run hermes:proof -- --receipt <path>` writes one combined local proof
+receipt covering installed plugin parity, plugin behavior tests, TUI clickable
+links, classic CLI clickable links, and local patch-scope audit. It is a compact
+handoff artifact for local proof layers, not backend acceptance, earnings, or
+payout settlement proof.
 
 `npm run upload:audit-public` fetches `origin/main` and audits the public branch,
 remote paths/refs, repository metadata, and GitHub code search for blocked

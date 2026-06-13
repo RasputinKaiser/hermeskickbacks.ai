@@ -108,6 +108,7 @@ check("generated Python caches are not vendored", () => {
 check("hooks are kwargs-compatible and cache fallback is wired", () => {
   const init = readFileSync(join(plugin, "__init__.py"), "utf8");
   const tracker = readFileSync(join(plugin, "tracker.py"), "utf8");
+  const hermesDoc = readFileSync(join(root, "HERMES.md"), "utf8");
   for (const hook of [
     "pre_llm_call",
     "post_llm_call",
@@ -124,6 +125,16 @@ check("hooks are kwargs-compatible and cache fallback is wired", () => {
   assert(
     init.includes("_tracker.set_ad(cached_ad, write_cache=False)"),
     "cache fallback should not rewrite cache timestamps",
+  );
+  assert(init.includes("ctx.register_command(\"kickbacks-click\""), "missing click command");
+  assert(tracker.includes("def record_click("), "missing click metric hook");
+  assert(hermesDoc.includes("/kickbacks-click"), "Hermes docs should mention click command");
+  assert(
+    hermesDoc.includes("TUI/classic CLI direct hyperlink click") &&
+      hermesDoc.includes("backend metric acceptance") &&
+      hermesDoc.includes("earnings movement") &&
+      hermesDoc.includes("payout settlement"),
+    "Hermes docs should keep click proof boundaries explicit",
   );
   assert(
     tracker.includes('STOP_GRACE_MS = _env_int("KICKBACKS_STOP_GRACE_MS", 350)'),
