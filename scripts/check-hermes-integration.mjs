@@ -59,6 +59,10 @@ check("Hermes upload and TUI link scripts are wired", () => {
     "missing Hermes local patch audit script",
   );
   assert(
+    pkg.scripts?.["hermes:proof"] === "node scripts/write-hermes-local-proof.mjs",
+    "missing Hermes local proof receipt script",
+  );
+  assert(
     pkg.scripts?.["hermes:update-safe"] === "node scripts/update-hermes-with-kickbacks.mjs",
     "missing safe Hermes update script",
   );
@@ -77,6 +81,7 @@ check("Hermes upload and TUI link scripts are wired", () => {
   assert(existsSync(join(root, "scripts", "patch-hermes-cli-clickable-ads.mjs")), "missing classic CLI link patcher");
   assert(existsSync(join(root, "scripts", "verify-hermes-cli-clickable-ads.mjs")), "missing classic CLI link verifier");
   assert(existsSync(join(root, "scripts", "verify-hermes-local-patches.mjs")), "missing local patch auditor");
+  assert(existsSync(join(root, "scripts", "write-hermes-local-proof.mjs")), "missing local proof receipt writer");
   assert(existsSync(join(root, "scripts", "update-hermes-with-kickbacks.mjs")), "missing safe Hermes updater");
 
   const safeUpdater = readFileSync(join(root, "scripts", "update-hermes-with-kickbacks.mjs"), "utf8");

@@ -208,6 +208,7 @@
     "hermes:cli-links": "node scripts/patch-hermes-cli-clickable-ads.mjs",
     "hermes:cli-verify": "node scripts/verify-hermes-cli-clickable-ads.mjs",
     "hermes:patch-audit": "node scripts/verify-hermes-local-patches.mjs",
+    "hermes:proof": "node scripts/write-hermes-local-proof.mjs",
     "hermes:update-safe": "node scripts/update-hermes-with-kickbacks.mjs",
     "hermes:test": "PYTHONPATH=hermes/plugins python3 -m unittest discover -s hermes/plugins/kickbacks/tests -p 'test_*.py'",
     "icon": "node scripts/gen-icon.mjs",
