@@ -202,7 +202,7 @@
     "upload:safety": "node scripts/check-upload-safety.mjs",
     "upload:audit-public": "node scripts/audit-public-upload.mjs",
     "hermes:verify": "npm run upload:safety && npm run hermes:check && npm run hermes:test && npm run hermes:status",
-    "hermes:full-verify": "npm run hermes:verify && npm run hermes:tui-verify && npm run hermes:cli-verify && npm run hermes:patch-audit && npm run upload:audit-public",
+    "hermes:full-verify": "npm run hermes:verify && npm run hermes:tui-verify && npm run hermes:cli-verify && npm run hermes:patch-audit && npm run hermes:proof && npm run upload:audit-public",
     "hermes:tui-links": "node scripts/patch-hermes-tui-clickable-ads.mjs",
     "hermes:tui-verify": "node scripts/verify-hermes-tui-clickable-ads.mjs",
     "hermes:cli-links": "node scripts/patch-hermes-cli-clickable-ads.mjs",

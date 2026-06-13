@@ -34,6 +34,25 @@ check("required Hermes plugin files exist", () => {
   }
 });
 
+check("README keeps anti-automation and official API boundaries", () => {
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  assert(readme.includes("## 🛑 Not for automation"), "README should keep anti-automation section");
+  assert(readme.includes("scripted earning loops"), "README should reject automated earning traffic");
+  assert(
+    readme.includes("https://kickbacks-backend-gmdaqm2c7q-uw.a.run.app"),
+    "README should name the official backend endpoint",
+  );
+  assert(
+    readme.includes("https://kickbacks-public-gmdaqm2c7q-uw.a.run.app"),
+    "README should name the official public update endpoint",
+  );
+  assert(readme.includes("Localhost/loopback"), "README should describe local loopback boundary");
+  assert(
+    readme.includes("Config and environment endpoint overrides exist as development knobs"),
+    "README should keep endpoint overrides scoped to development",
+  );
+});
+
 check("Hermes upload and TUI link scripts are wired", () => {
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   assert(pkg.scripts?.["upload:safety"] === "node scripts/check-upload-safety.mjs", "missing upload safety script");
@@ -71,7 +90,7 @@ check("Hermes upload and TUI link scripts are wired", () => {
     "Hermes verify should run upload safety first",
   );
   assert(
-    pkg.scripts?.["hermes:full-verify"] === "npm run hermes:verify && npm run hermes:tui-verify && npm run hermes:cli-verify && npm run hermes:patch-audit && npm run upload:audit-public",
+    pkg.scripts?.["hermes:full-verify"] === "npm run hermes:verify && npm run hermes:tui-verify && npm run hermes:cli-verify && npm run hermes:patch-audit && npm run hermes:proof && npm run upload:audit-public",
     "missing full Hermes verification script",
   );
   assert(existsSync(join(root, "scripts", "check-upload-safety.mjs")), "missing upload safety checker");

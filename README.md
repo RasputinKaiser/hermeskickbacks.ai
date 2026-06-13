@@ -59,6 +59,21 @@ traffic, click farms, scripted earning loops, artificial idle sessions, or
 automated clicking. Invalid or abusive activity may be rejected and may not be
 credited or paid.
 
+## 🔒 Network boundaries
+
+In normal use, this plugin talks to the official Kickbacks.ai service endpoints:
+
+- `https://kickbacks-backend-gmdaqm2c7q-uw.a.run.app` for auth, consent,
+  portfolio, signed metrics, earnings, and sign-out.
+- `https://kickbacks-public-gmdaqm2c7q-uw.a.run.app` for public update metadata.
+- Localhost/loopback only for the extension's own local VS Code webview bridge.
+- Ad clicks open the safe `http(s)` click URL supplied by the Kickbacks
+  portfolio for the currently rendered ad.
+
+Config and environment endpoint overrides exist as development knobs. They are
+not the public plugin path, and they should not be used to point this public
+plugin at unrelated third-party APIs.
+
 ## 🎯 Where the ad shows up
 
 Multiple local surfaces, one plugin:

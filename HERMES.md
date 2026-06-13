@@ -139,9 +139,9 @@ identity strings. It is intentionally separate from `hermes:verify` because it
 uses network and GitHub CLI state.
 `npm run hermes:full-verify` runs local plugin verification, local Hermes TUI
 clickable-ad verification, local Hermes classic CLI clickable-ad verification,
-local Hermes patch-scope audit, and the public upload audit in sequence. It is
-the strongest repeatable proof command, but it depends on the local Hermes
-install and network/GitHub CLI state.
+local Hermes patch-scope audit, the combined local proof receipt, and the public
+upload audit in sequence. It is the strongest repeatable proof command, but it
+depends on the local Hermes install and network/GitHub CLI state.
 
 ## Runtime Contract
 
