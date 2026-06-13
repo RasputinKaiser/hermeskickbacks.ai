@@ -15,6 +15,7 @@ Hooks:
 
 Slash Commands:
   - /kickbacks: show earnings, ad status, and controls
+  - /kickbacks-click: record and open the current ad link
   - /kickbacks-signin: start Google OAuth sign-in flow
   - /kickbacks-signout: sign out and clear auth
   - /kickbacks-debug: show detailed debug info
@@ -140,6 +141,10 @@ def register(ctx):
         """Show Kickbacks status, earnings, and current ad."""
         return _handle_kickbacks_command(args)
 
+    def cmd_kickbacks_click(args: str) -> str:
+        """Record a click for the current ad and return its link."""
+        return _handle_click_command(args)
+
     def cmd_kickbacks_signin(args: str) -> str:
         """Start Google OAuth sign-in with kickbacks.ai."""
         return _handle_signin_command(args)
@@ -153,6 +158,7 @@ def register(ctx):
         return _handle_debug_command(args)
 
     ctx.register_command("kickbacks", cmd_kickbacks, "Show Kickbacks earnings and ad status")
+    ctx.register_command("kickbacks-click", cmd_kickbacks_click, "Record and open the current Kickbacks ad")
     ctx.register_command("kickbacks-signin", cmd_kickbacks_signin, "Sign in to kickbacks.ai with Google")
     ctx.register_command("kickbacks-signout", cmd_kickbacks_signout, "Sign out from kickbacks.ai")
     ctx.register_command("kickbacks-debug", cmd_kickbacks_debug, "Show Kickbacks debug info")
@@ -304,6 +310,23 @@ def _handle_kickbacks_command(args: str) -> str:
     lines.append(f"📊 Correlation: `{status.get('corr', 'none')}`")
 
     return "\n".join(lines)
+
+
+def _handle_click_command(args: str) -> str:
+    """Handle /kickbacks-click — record a click and show the current ad link."""
+    if not _tracker:
+        return "📢 No Kickbacks tracker is active yet."
+
+    status = _tracker.get_status()
+    ad_text = status.get("ad_text")
+    click_url = status.get("click_url")
+    if not ad_text or not click_url:
+        return "📢 No clickable Kickbacks ad is currently loaded."
+
+    recorded = _tracker.record_click(surface="slash-command")
+    record_text = "recorded locally" if recorded else "not recorded"
+    link = _markdown_link(ad_text, click_url)
+    return f"📢 **Current ad:** {link}\n\nClick metric: {record_text}."
 
 
 def _handle_signin_command(args: str) -> str:

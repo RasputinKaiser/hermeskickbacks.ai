@@ -9,6 +9,18 @@ from kickbacks import api
 from kickbacks.tracker import ImpressionTracker
 
 
+class FakeContext:
+    def __init__(self):
+        self.commands = {}
+        self.hooks = {}
+
+    def register_hook(self, name, callback):
+        self.hooks[name] = callback
+
+    def register_command(self, name, callback, description):
+        self.commands[name] = (callback, description)
+
+
 def make_ad() -> api.PatchAd:
     return api.PatchAd(
         {
@@ -24,6 +36,8 @@ def make_ad() -> api.PatchAd:
 class ClickableAdTests(unittest.TestCase):
     def tearDown(self):
         plugin_module._tracker = None
+        plugin_module._portfolio_response = None
+        plugin_module._rotation_index = -1
 
     def test_tracker_status_exposes_click_url(self):
         tracker = ImpressionTracker()
@@ -53,6 +67,38 @@ class ClickableAdTests(unittest.TestCase):
         with patch("kickbacks.tracker.api.send_metric") as send_metric:
             self.assertFalse(tracker.record_click())
 
+        send_metric.assert_not_called()
+
+    def test_register_exposes_click_command(self):
+        ctx = FakeContext()
+
+        with patch.object(plugin_module, "_fetch_and_rotate_ads"), \
+             patch.object(plugin_module, "_schedule_fetch"), \
+             patch.object(plugin_module.api, "is_signed_in", return_value=False):
+            plugin_module.register(ctx)
+
+        self.assertIn("kickbacks-click", ctx.commands)
+        self.assertIn("Record and open", ctx.commands["kickbacks-click"][1])
+
+    def test_click_command_records_metric_and_returns_link(self):
+        plugin_module._tracker = ImpressionTracker()
+        plugin_module._tracker.set_ad(make_ad(), write_cache=False)
+
+        with patch("kickbacks.tracker.api.send_metric", return_value=True) as send_metric:
+            output = plugin_module._handle_click_command("")
+
+        self.assertIn("[Clickable sponsor](https://kickbacks.ai/click)", output)
+        self.assertIn("Click metric: recorded locally.", output)
+        self.assertEqual(send_metric.call_args.args[0], "click")
+        self.assertEqual(send_metric.call_args.kwargs["surface"], "slash-command")
+
+    def test_click_command_handles_missing_ad(self):
+        plugin_module._tracker = ImpressionTracker()
+
+        with patch("kickbacks.tracker.api.send_metric") as send_metric:
+            output = plugin_module._handle_click_command("")
+
+        self.assertIn("No clickable Kickbacks ad", output)
         send_metric.assert_not_called()
 
     def test_kickbacks_command_renders_current_ad_as_markdown_link(self):
