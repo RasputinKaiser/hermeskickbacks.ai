@@ -16,6 +16,7 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { isLoopbackBase } from "./util/loopback";
 
 export interface VibeAdsConfig {
   backendBaseUrl: string;
@@ -94,24 +95,42 @@ export function ensureConfigFile(): string {
   return p;
 }
 
-const DEFAULT_BACKEND_BASE = "https://kickbacks-backend-gmdaqm2c7q-uw.a.run.app";
+export const DEFAULT_BACKEND_BASE = "https://kickbacks-backend-gmdaqm2c7q-uw.a.run.app";
+export const DEFAULT_UPDATE_BASE = "https://kickbacks-public-gmdaqm2c7q-uw.a.run.app";
+
+function canonicalBase(raw: string): string {
+  return raw.trim().replace(/\/+$/, "");
+}
+
+function isOfficialBase(raw: string, official: string): boolean {
+  try {
+    return new URL(canonicalBase(raw)).origin === new URL(official).origin;
+  } catch {
+    return false;
+  }
+}
+
+function allowedServiceBase(raw: string, official: string): string | null {
+  const value = canonicalBase(raw);
+  if (!value) return null;
+  if (isOfficialBase(value, official) || isLoopbackBase(value)) return value;
+  return null;
+}
 
 /** Resolve the effective backend base URL: config file > env > default.
- *  Non-loopback HTTP is refused at the call site in extension.ts (this fn
- *  is pure and side-effect-free so it can be unit-tested without mocking). */
+ *  Production clients stay on Kickbacks.ai's official service. Loopback is
+ *  retained for local development; unrelated third-party API hosts are ignored. */
 export function resolveBackendBase(cfg: VibeAdsConfig, env: string | undefined): string {
-  if (cfg.backendBaseUrl) return cfg.backendBaseUrl;
-  if (env) return env;
+  if (cfg.backendBaseUrl) return allowedServiceBase(cfg.backendBaseUrl, DEFAULT_BACKEND_BASE) ?? DEFAULT_BACKEND_BASE;
+  if (env) return allowedServiceBase(env, DEFAULT_BACKEND_BASE) ?? DEFAULT_BACKEND_BASE;
   return DEFAULT_BACKEND_BASE;
 }
 
-const DEFAULT_UPDATE_BASE = "https://kickbacks-public-gmdaqm2c7q-uw.a.run.app";
-
 /** Resolve the self-update manifest base URL: config > env > public site.
  *  Separated from the API base so self-update works over the public internet
- *  while auth/metrics can still hit the local backend during migration. */
+ *  while auth/metrics stay on the official API or loopback during local dev. */
 export function resolveUpdateBase(cfg: VibeAdsConfig, env: string | undefined): string {
-  if (cfg.updateBaseUrl) return cfg.updateBaseUrl;
-  if (env) return env;
+  if (cfg.updateBaseUrl) return allowedServiceBase(cfg.updateBaseUrl, DEFAULT_UPDATE_BASE) ?? DEFAULT_UPDATE_BASE;
+  if (env) return allowedServiceBase(env, DEFAULT_UPDATE_BASE) ?? DEFAULT_UPDATE_BASE;
   return DEFAULT_UPDATE_BASE;
 }

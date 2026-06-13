@@ -49,25 +49,11 @@ import { watchFile as nodeWatchFile, readFileSync, statSync } from "node:fs";
 import { reloadSentinelPath, parseSentinel, decideReload } from "./reloadSignal";
 import { readConfig, resolveBackendBase, resolveUpdateBase, configPath,
   ensureConfigFile, DEFAULT_POLL_MS } from "./config";
-import { isLoopbackBase } from "./util/loopback";
 import { errMsg } from "./util/errMsg";
 
 const CFG = readConfig();
 
-const BASE = (() => {
-  const v = resolveBackendBase(CFG,
-    process.env.KICKBACKS_BASE || process.env.VIBE_ADS_BASE);
-  if (v.startsWith("http://")) {
-    const looplike = isLoopbackBase(v);
-    if (!looplike) {
-      // eslint-disable-next-line no-console
-      console.error(`Kickbacks: refusing non-loopback HTTP base "${v}". ` +
-        `Set VIBE_ADS_BASE (or ~/.vibe-ads/config.json) to https://...`);
-      return "https://invalid.example.invalid";
-    }
-  }
-  return v;
-})();
+const BASE = resolveBackendBase(CFG, process.env.KICKBACKS_BASE || process.env.VIBE_ADS_BASE);
 
 const UPDATE_BASE = resolveUpdateBase(CFG, process.env.KICKBACKS_UPDATE_BASE);
 

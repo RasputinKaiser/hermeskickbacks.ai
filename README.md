@@ -70,9 +70,9 @@ In normal use, this plugin talks to the official Kickbacks.ai service endpoints:
 - Ad clicks open the safe `http(s)` click URL supplied by the Kickbacks
   portfolio for the currently rendered ad.
 
-Config and environment endpoint overrides exist as development knobs. They are
-not the public plugin path, and they should not be used to point this public
-plugin at unrelated third-party APIs.
+Config and environment endpoint overrides exist as development knobs. The
+runtime ignores unrelated third-party API hosts; only the official Kickbacks.ai
+service origins or local loopback development endpoints are accepted.
 
 ## 🎯 Where the ad shows up
 

@@ -48,9 +48,22 @@ check("README keeps anti-automation and official API boundaries", () => {
   );
   assert(readme.includes("Localhost/loopback"), "README should describe local loopback boundary");
   assert(
-    readme.includes("Config and environment endpoint overrides exist as development knobs"),
-    "README should keep endpoint overrides scoped to development",
+    readme.includes("runtime ignores unrelated third-party API hosts"),
+    "README should say unrelated endpoint overrides are ignored",
   );
+});
+
+check("client API endpoints are official-or-loopback allowlisted", () => {
+  const config = readFileSync(join(root, "src", "config.ts"), "utf8");
+  const api = readFileSync(join(plugin, "api.py"), "utf8");
+  const configTest = readFileSync(join(root, "test", "config.test.ts"), "utf8");
+  const apiTest = readFileSync(join(plugin, "tests", "test_api_boundaries.py"), "utf8");
+  assert(config.includes("allowedServiceBase"), "VS Code config resolver should allowlist service bases");
+  assert(config.includes("isLoopbackBase"), "VS Code config resolver should retain loopback dev endpoints");
+  assert(api.includes("_allowed_service_base"), "Hermes API resolver should allowlist service bases");
+  assert(api.includes("_is_loopback_base"), "Hermes API resolver should retain loopback dev endpoints");
+  assert(configTest.includes("ignores unrelated external API hosts"), "missing VS Code endpoint boundary test");
+  assert(apiTest.includes("ignores_unrelated_external"), "missing Hermes endpoint boundary test");
 });
 
 check("Hermes upload and TUI link scripts are wired", () => {

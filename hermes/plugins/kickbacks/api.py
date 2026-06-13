@@ -20,6 +20,7 @@ from typing import Optional
 
 import urllib.request
 import urllib.error
+from urllib.parse import urlparse
 
 
 # ── Config ──────────────────────────────────────────────────────────────────
@@ -35,16 +36,46 @@ KEYCHAIN_SERVICE = "vibe-ads"
 ENVELOPE_RE = re.compile(r"^(plain|keychain|dpapi|libsecret):1:(.*)$")
 
 
+def _canonical_base(value: object) -> str:
+    return str(value or "").strip().rstrip("/")
+
+
+def _is_loopback_base(value: str) -> bool:
+    try:
+        parsed = urlparse(value)
+    except Exception:
+        return False
+    return parsed.hostname in ("localhost", "127.0.0.1", "::1")
+
+
+def _is_official_base(value: str, official: str) -> bool:
+    try:
+        parsed = urlparse(value)
+        expected = urlparse(official)
+    except Exception:
+        return False
+    return parsed.scheme == expected.scheme and parsed.netloc == expected.netloc
+
+
+def _allowed_service_base(value: object, official: str) -> Optional[str]:
+    base = _canonical_base(value)
+    if not base:
+        return None
+    if _is_official_base(base, official) or _is_loopback_base(base):
+        return base
+    return None
+
+
 def _backend_base() -> str:
-    """Resolve the backend base URL: env > config file > default."""
+    """Resolve the backend base URL: official Kickbacks.ai or loopback only."""
     env = os.environ.get("KICKBACKS_BASE") or os.environ.get("VIBE_ADS_BASE")
     if env:
-        return env.rstrip("/")
+        return _allowed_service_base(env, DEFAULT_BACKEND) or DEFAULT_BACKEND
     if CONFIG_FILE.exists():
         try:
             cfg = json.loads(CONFIG_FILE.read_text())
             if cfg.get("backendBaseUrl"):
-                return cfg["backendBaseUrl"].rstrip("/")
+                return _allowed_service_base(cfg["backendBaseUrl"], DEFAULT_BACKEND) or DEFAULT_BACKEND
         except (json.JSONDecodeError, KeyError):
             pass
     return DEFAULT_BACKEND
