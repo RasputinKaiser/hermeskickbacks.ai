@@ -42,6 +42,7 @@ function main() {
     run("Hermes update", "hermes", ["update"], { cwd: root });
   }
 
+  run("install Hermes Kickbacks plugin", "npm", ["run", "hermes:install"], { cwd: root });
   run("reapply Hermes TUI links", "npm", ["run", "hermes:tui-links"], { cwd: root });
   run("reapply Hermes classic CLI links", "npm", ["run", "hermes:cli-links"], { cwd: root });
 

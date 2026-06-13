@@ -78,6 +78,14 @@ check("Hermes upload and TUI link scripts are wired", () => {
   assert(existsSync(join(root, "scripts", "verify-hermes-cli-clickable-ads.mjs")), "missing classic CLI link verifier");
   assert(existsSync(join(root, "scripts", "verify-hermes-local-patches.mjs")), "missing local patch auditor");
   assert(existsSync(join(root, "scripts", "update-hermes-with-kickbacks.mjs")), "missing safe Hermes updater");
+
+  const safeUpdater = readFileSync(join(root, "scripts", "update-hermes-with-kickbacks.mjs"), "utf8");
+  assert(
+    safeUpdater.includes("\"hermes:install\"") &&
+      safeUpdater.indexOf("\"hermes:install\"") < safeUpdater.indexOf("\"hermes:tui-links\"") &&
+      safeUpdater.indexOf("\"hermes:tui-links\"") < safeUpdater.indexOf("\"hermes:cli-links\""),
+    "safe Hermes updater must refresh plugin parity before TUI and classic CLI patches",
+  );
 });
 
 check("generated Python caches are not vendored", () => {
