@@ -52,6 +52,7 @@ npm run hermes:tui-verify
 npm run hermes:cli-links
 npm run hermes:cli-verify
 npm run hermes:patch-audit
+npm run hermes:update-safe
 npm run upload:audit-public
 node scripts/install-hermes-plugin.mjs --dry-run
 node scripts/install-hermes-plugin.mjs --check
@@ -100,6 +101,18 @@ npm run hermes:tui-links
 npm run hermes:cli-links
 npm run hermes:full-verify
 ```
+
+For the full update cycle, prefer:
+
+```bash
+npm run hermes:update-safe
+```
+
+It snapshots the local Hermes checkout into `.codex/hermes-update-backups`,
+stashes the current local Hermes patch set, runs `hermes update`, reapplies the
+TUI and classic CLI link patches, and runs `hermes:full-verify`. Use
+`-- --skip-update` to reapply and verify after an update already happened, or
+`-- --skip-verify` when you only need the reapply step.
 
 `npm run hermes:patch-audit` verifies the installed Hermes checkout is at
 `origin/main` and that its local dirty file set is exactly the expected
