@@ -119,6 +119,29 @@ class ImpressionTracker:
             self._cancel_stop_timer_locked()
             self._maybe_begin_capture_locked()
 
+    def record_click(self, *, surface: str = "statusline") -> bool:
+        """Record an operator click for the current ad."""
+        with self._lock:
+            ad = self._capture_ad or self._ad
+            if not ad:
+                return False
+            corr = self._capture_corr or self._corr
+            session_nonce = self._session_nonce
+
+        try:
+            return bool(api.send_metric(
+                "click",
+                ad,
+                hermes_version=self._hermes_version,
+                corr=corr,
+                surface=surface,
+                event_uuid=str(uuid.uuid4()),
+                session_nonce=session_nonce,
+                session_token=ad.session_token,
+            ))
+        except Exception:
+            return False
+
     def _maybe_begin_capture_locked(self, now: Optional[float] = None) -> bool:
         if self._showing:
             self._schedule_tick_locked()

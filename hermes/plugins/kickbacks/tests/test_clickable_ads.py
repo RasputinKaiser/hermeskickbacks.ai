@@ -2,6 +2,7 @@ import unittest
 import importlib.machinery
 import importlib.util
 from pathlib import Path
+from unittest.mock import patch
 
 import kickbacks as plugin_module
 from kickbacks import api
@@ -29,6 +30,30 @@ class ClickableAdTests(unittest.TestCase):
         tracker.set_ad(make_ad(), write_cache=False)
 
         self.assertEqual(tracker.get_status()["click_url"], "https://kickbacks.ai/click")
+
+    def test_tracker_record_click_sends_click_metric(self):
+        tracker = ImpressionTracker(hermes_version="hermes/test")
+        tracker.set_ad(make_ad(), write_cache=False)
+
+        with patch("kickbacks.tracker.api.send_metric", return_value=True) as send_metric:
+            self.assertTrue(tracker.record_click(surface="slash-command"))
+
+        _, args, kwargs = send_metric.mock_calls[0]
+        self.assertEqual(args[0], "click")
+        self.assertEqual(args[1].ad_id, "ad-click")
+        self.assertEqual(kwargs["hermes_version"], "hermes/test")
+        self.assertEqual(kwargs["surface"], "slash-command")
+        self.assertEqual(kwargs["session_token"], "session-click")
+        self.assertTrue(kwargs["corr"].startswith("ad-click."))
+        self.assertTrue(kwargs["event_uuid"])
+
+    def test_tracker_record_click_returns_false_without_ad(self):
+        tracker = ImpressionTracker()
+
+        with patch("kickbacks.tracker.api.send_metric") as send_metric:
+            self.assertFalse(tracker.record_click())
+
+        send_metric.assert_not_called()
 
     def test_kickbacks_command_renders_current_ad_as_markdown_link(self):
         plugin_module._tracker = ImpressionTracker()
