@@ -15,6 +15,7 @@ function main() {
   mkdirSync(workDir, { recursive: true });
 
   const pluginReceipt = join(workDir, "plugin.json");
+  const pluginTestsReceipt = join(workDir, "plugin-tests.json");
   const tuiReceipt = join(workDir, "tui.json");
   const cliReceipt = join(workDir, "cli.json");
   const patchReceipt = join(workDir, "patches.json");
@@ -25,6 +26,17 @@ function main() {
     "--receipt",
     pluginReceipt,
   ]);
+  run("plugin behavior tests", "npm", ["run", "hermes:test"]);
+  writeJson(pluginTestsReceipt, {
+    schemaVersion: 1,
+    surface: "hermes-plugin",
+    proofLayer: "local-plugin-behavior-tests",
+    proofBoundary:
+      "local plugin unit tests for visibility timing, rotation, cache fallback, link formatting, and click metric hook only; not backend metric acceptance, earnings movement, or payout settlement",
+    generatedAt: new Date().toISOString(),
+    command: "npm run hermes:test",
+    testsRun: true,
+  });
   run("TUI clickable receipt", "node", [
     "scripts/verify-hermes-tui-clickable-ads.mjs",
     "--receipt",
@@ -44,13 +56,14 @@ function main() {
   const receipt = {
     schemaVersion: 1,
     surface: "hermes-local-proof",
-    proofLayer: "local-hermes-plugin-tui-cli-clickable",
+    proofLayer: "local-hermes-plugin-tests-tui-cli-clickable",
     proofBoundary:
-      "local plugin file parity, TUI clickable-link checks, classic CLI clickable-link checks, and local patch-scope audit only; not backend metric acceptance, earnings movement, or payout settlement",
+      "local plugin file parity and unit tests, TUI clickable-link checks, classic CLI clickable-link checks, and local patch-scope audit only; not backend metric acceptance, earnings movement, or payout settlement",
     generatedAt: new Date().toISOString(),
     repo: readRepoState(),
     receipts: {
       plugin: redactReceipt(readJson(pluginReceipt)),
+      pluginTests: redactReceipt(readJson(pluginTestsReceipt)),
       tui: redactReceipt(readJson(tuiReceipt)),
       classicCli: redactReceipt(readJson(cliReceipt)),
       patches: redactReceipt(readJson(patchReceipt)),
@@ -85,6 +98,11 @@ function readJson(file) {
     throw new Error(`missing receipt: ${file}`);
   }
   return JSON.parse(readFileSync(file, "utf8"));
+}
+
+function writeJson(file, value) {
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
 function readRepoState() {

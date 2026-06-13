@@ -91,6 +91,12 @@ check("Hermes upload and TUI link scripts are wired", () => {
       safeUpdater.indexOf("\"hermes:tui-links\"") < safeUpdater.indexOf("\"hermes:cli-links\""),
     "safe Hermes updater must refresh plugin parity before TUI and classic CLI patches",
   );
+
+  const localProof = readFileSync(join(root, "scripts", "write-hermes-local-proof.mjs"), "utf8");
+  assert(
+    localProof.includes("\"hermes:test\"") && localProof.includes("pluginTests"),
+    "Hermes local proof receipt must include plugin behavior tests",
+  );
 });
 
 check("generated Python caches are not vendored", () => {
