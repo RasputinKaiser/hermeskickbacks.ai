@@ -38,7 +38,7 @@ _tracker: ImpressionTracker | None = None
 _fetch_timer: threading.Timer | None = None
 _fetch_lock = threading.Lock()
 _portfolio_response: api.PortfolioResponse | None = None
-_rotation_index: int = 0
+_rotation_index: int = -1
 _last_fetch_time: float = 0.0
 _hermes_version: str = "hermes/0.1.0"
 
