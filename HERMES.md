@@ -51,6 +51,7 @@ npm run hermes:tui-links
 npm run hermes:tui-verify
 npm run hermes:cli-links
 npm run hermes:cli-verify
+npm run hermes:patch-audit
 npm run upload:audit-public
 node scripts/install-hermes-plugin.mjs --dry-run
 node scripts/install-hermes-plugin.mjs --check
@@ -100,15 +101,20 @@ npm run hermes:cli-links
 npm run hermes:full-verify
 ```
 
+`npm run hermes:patch-audit` verifies the installed Hermes checkout is at
+`origin/main` and that its local dirty file set is exactly the expected
+Kickbacks TUI/classic CLI patch surface. It should pass after reapplying the
+patches; extra dirty Hermes files are treated as drift.
+
 `npm run upload:audit-public` fetches `origin/main` and audits the public branch,
 remote paths/refs, repository metadata, and GitHub code search for blocked
 identity strings. It is intentionally separate from `hermes:verify` because it
 uses network and GitHub CLI state.
 `npm run hermes:full-verify` runs local plugin verification, local Hermes TUI
 clickable-ad verification, local Hermes classic CLI clickable-ad verification,
-and the public upload audit in sequence. It is the strongest repeatable proof
-command, but it depends on the local Hermes install and network/GitHub CLI
-state.
+local Hermes patch-scope audit, and the public upload audit in sequence. It is
+the strongest repeatable proof command, but it depends on the local Hermes
+install and network/GitHub CLI state.
 
 ## Runtime Contract
 
