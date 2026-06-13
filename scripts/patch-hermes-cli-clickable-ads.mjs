@@ -6,11 +6,17 @@ import { join } from "node:path";
 const home = process.env.HOME || homedir();
 const agentRoot = process.env.HERMES_AGENT_ROOT || join(home, ".hermes", "hermes-agent");
 const cliFile = join(agentRoot, "cli.py");
+const commandsFile = join(agentRoot, "hermes_cli", "commands.py");
 const kickbacksFile = join(agentRoot, "hermes_cli", "kickbacks.py");
 const testFile = join(agentRoot, "tests", "hermes_cli", "test_kickbacks.py");
 
 if (!existsSync(cliFile)) {
   console.error(`Hermes CLI file not found: ${cliFile}`);
+  process.exit(1);
+}
+
+if (!existsSync(commandsFile)) {
+  console.error(`Hermes commands file not found: ${commandsFile}`);
   process.exit(1);
 }
 
@@ -64,6 +70,24 @@ patchFile(kickbacksFile, (src) => {
   return out;
 });
 
+patchFile(commandsFile, (src) => {
+  let out = src;
+
+  out = insertAfterOnce(
+    out,
+    "    CommandDef(\"status\", \"Show session info\", \"Session\"),",
+    [
+      "    CommandDef(\"kickbacks\", \"Show Kickbacks ad and auth status\", \"Info\"),",
+      "    CommandDef(\"kickbacks-signin\", \"Show Kickbacks sign-in help\", \"Info\",",
+      "               aliases=(\"kickbacks_signin\",)),",
+      "    CommandDef(\"kickbacks-debug\", \"Show Kickbacks cache debug info\", \"Info\",",
+      "               aliases=(\"kickbacks_debug\",)),",
+    ].join("\n")
+  );
+
+  return out;
+});
+
 patchFile(cliFile, (src) => {
   let out = src;
 
@@ -71,6 +95,16 @@ patchFile(cliFile, (src) => {
     out,
     "        self._kickbacks_ad_text: str = \"\"",
     "        self._kickbacks_ad_url: str = \"\""
+  );
+
+  out = insertAfterOnce(
+    out,
+    "        self._spinner_text: str = \"\"  # thinking spinner text for TUI",
+    [
+      "        self._kickbacks_ad_text: str = \"\"",
+      "        self._kickbacks_ad_url: str = \"\"",
+      "        self._kickbacks_ad_expires_at: float = 0.0",
+    ].join("\n")
   );
 
   out = replaceOnce(
@@ -96,15 +130,43 @@ patchFile(cliFile, (src) => {
     "            self._kickbacks_ad_url = \"\""
   );
 
+  out = replaceOnce(
+    out,
+    [
+      "    def _render_spinner_text(self) -> str:",
+      "        \"\"\"Return the live spinner/status text exactly as rendered in the TUI.\"\"\"",
+      "        txt = getattr(self, \"_spinner_text\", \"\")",
+      "        if not txt:",
+      "            return \"\"",
+      "        t0 = getattr(self, \"_tool_start_time\", 0) or 0",
+      "        if t0 > 0:",
+      "            elapsed = time.monotonic() - t0",
+      "            if elapsed >= 60:",
+      "                _m, _s = int(elapsed // 60), int(elapsed % 60)",
+      "                # Fixed-width timer to avoid status-line wrap jitter while",
+      "                # scrolling/repainting (e.g. 01m05s, 12m09s).",
+      "                elapsed_str = f\"{_m:02d}m{_s:02d}s\"",
+      "            else:",
+      "                # Keep width stable before the 60s rollover as well.",
+      "                elapsed_str = f\"{elapsed:5.1f}s\"",
+      "            return f\"  {txt}  ({elapsed_str})\"",
+      "        return f\"  {txt}\"",
+    ].join("\n"),
+    spinnerRenderHelpers()
+  );
+
   out = insertAfterOnce(
     out,
     [
-      "        if ad:",
-      "            sep = \"  ·  \" if base else \"  \"",
-      "            suffix = f\"{sep}{ad}\"",
-      "        return f\"{base}{suffix}\"",
+      "        elif canonical == \"status\":",
+      "            self._show_session_status()",
     ].join("\n"),
-    spinnerFragmentsHelper()
+    [
+      "        elif canonical in {\"kickbacks\", \"kickbacks-signin\", \"kickbacks-debug\"}:",
+      "            from hermes_cli.kickbacks import handle_kickbacks_command",
+      "",
+      "            _cprint(handle_kickbacks_command(cmd_original))",
+    ].join("\n")
   );
 
   out = replaceOnce(
@@ -557,8 +619,49 @@ function currentAdLinkHelper() {
   ].join("\n");
 }
 
-function spinnerFragmentsHelper() {
+function spinnerRenderHelpers() {
   return [
+    "    def _refresh_kickbacks_ad_text(self, *, force: bool = False) -> str:",
+    "        \"\"\"Refresh the compact Kickbacks ad suffix used by the CLI spinner.\"\"\"",
+    "        now = time.monotonic()",
+    "        if not force and now < getattr(self, \"_kickbacks_ad_expires_at\", 0.0):",
+    "            return getattr(self, \"_kickbacks_ad_text\", \"\") or \"\"",
+    "        try:",
+    "            from hermes_cli.kickbacks import current_ad_link",
+    "",
+    "            self._kickbacks_ad_text, self._kickbacks_ad_url = current_ad_link(",
+    "                max_length=80,",
+    "                fresh_seconds=600,",
+    "            )",
+    "        except Exception:",
+    "            self._kickbacks_ad_text = \"\"",
+    "            self._kickbacks_ad_url = \"\"",
+    "        self._kickbacks_ad_expires_at = now + 10",
+    "        return self._kickbacks_ad_text",
+    "",
+    "    def _render_spinner_text(self) -> str:",
+    "        \"\"\"Return the live spinner/status text exactly as rendered in the TUI.\"\"\"",
+    "        txt = getattr(self, \"_spinner_text\", \"\")",
+    "        ad = self._refresh_kickbacks_ad_text() if (txt or getattr(self, \"_agent_running\", False)) else \"\"",
+    "        base = \"\"",
+    "        if txt:",
+    "            t0 = getattr(self, \"_tool_start_time\", 0) or 0",
+    "            if t0 > 0:",
+    "                elapsed = time.monotonic() - t0",
+    "                if elapsed >= 60:",
+    "                    _m, _s = int(elapsed // 60), int(elapsed % 60)",
+    "                    elapsed_str = f\"{_m:02d}m{_s:02d}s\"",
+    "                else:",
+    "                    elapsed_str = f\"{elapsed:5.1f}s\"",
+    "                base = f\"  {txt}  ({elapsed_str})\"",
+    "            else:",
+    "                base = f\"  {txt}\"",
+    "        suffix = \"\"",
+    "        if ad:",
+    "            sep = \"  ·  \" if base else \"  \"",
+    "            suffix = f\"{sep}{ad}\"",
+    "        return f\"{base}{suffix}\"",
+    "",
     "",
     "    def _render_spinner_fragments(self):",
     "        \"\"\"Return prompt_toolkit fragments for the spinner with a linked ad suffix.\"\"\"",
