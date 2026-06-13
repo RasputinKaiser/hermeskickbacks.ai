@@ -3,7 +3,7 @@
   "displayName": "Kickbacks.ai",
   "publisher": "Kickbacksai",
   "version": "0.3.174",
-  "description": "Get paid while you code. Subtle, clickable ads in the Claude Code and Codex spinners — 50/50 revenue split to users.",
+  "description": "Get paid while you code. Clickable sponsored slots for Claude Code, Codex, and Hermes Agent.",
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
@@ -236,7 +236,10 @@
   },
   "keywords": [
     "claude-code",
+    "codex",
+    "hermes-agent",
     "ads",
+    "cli",
     "spinner",
     "earnings",
     "kickbacks"

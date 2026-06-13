@@ -8,9 +8,9 @@
 
 ### Get paid while you code.
 
-**Kickbacks** sells the little "thinking…" word inside the Claude Code & Codex
-spinners — and pays **up to 50% of ad revenue back to you**, the developer whose
-machine showed it.
+**Kickbacks** sells the little "thinking…" word inside Claude Code, Codex, and
+Hermes Agent wait states — and pays **up to 50% of ad revenue back to you**, the
+developer whose machine showed it.
 
 [![Website](https://img.shields.io/badge/kickbacks.ai-00B894?style=for-the-badge&logoColor=white)](https://kickbacks.ai)
 [![VS Code Marketplace](https://img.shields.io/badge/VS%20Code-Install-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=Kickbacksai.kickbacks-ai)
@@ -22,8 +22,9 @@ machine showed it.
 
 ## 💡 The idea
 
-When Claude Code or Codex is thinking, it shows a random verb — *"Discombobulating…"*,
-*"Baking…"*, *"Percolating…"*. Cute, but it's prime real estate doing nothing.
+When Claude Code, Codex, or Hermes Agent is thinking, it shows a random verb or
+status row — *"Discombobulating…"*, *"Baking…"*, *"Percolating…"*. Cute, but
+it's prime real estate doing nothing.
 
 Kickbacks turns that one line into a tiny, tasteful, **clickable** sponsored slot.
 Advertisers bid for it in an open auction. You get **up to 50% of ad revenue**
@@ -53,7 +54,7 @@ Kickbacks  ($0.42 today · $7.11)
 
 ## 🎯 Where the ad shows up
 
-Four surfaces, one extension:
+Multiple local surfaces, one plugin:
 
 | Surface | Where | Needs |
 | --- | --- | --- |
@@ -61,13 +62,37 @@ Four surfaces, one extension:
 | **Thinking-shimmer** | Codex VS Code panel | A compatible extension build |
 | **Status-bar line** | Claude Code terminal CLI | Any Claude Code version |
 | **Spinner verb** | Claude Code terminal CLI | Claude Code **2.1.143+** |
-| **Runtime hooks** | Hermes Agent CLI/plugin runtime | Install `hermes/plugins/kickbacks` |
+| **Runtime hooks** | Hermes Agent plugin runtime | `npm run hermes:install` |
+| **TUI status row** | Hermes Ink TUI | `npm run hermes:tui-links` |
+| **Classic CLI spinner** | Hermes `--cli` prompt_toolkit runtime | `npm run hermes:cli-links` |
+| **Slash command link** | Hermes `/kickbacks-click` | Installed Hermes plugin |
 
 VS Code surfaces work on local, Remote-SSH, devcontainers, and code-server.
 Older CLIs just keep their stock verbs — nothing breaks.
 
-This fork also carries a Hermes Agent integration. See [HERMES.md](HERMES.md)
-for install, status, testing, and proof-layer boundaries.
+This fork carries the Hermes Agent plugin too: clickable sponsored text in the
+Hermes TUI/classic CLI and a `/kickbacks-click` command for the current ad. See
+[HERMES.md](HERMES.md) for Hermes install, update notes, and proof-layer
+boundaries.
+
+## 🧠 Hermes Agent
+
+Hermes support lives under `hermes/plugins/kickbacks` and is installed into your
+local Hermes profile:
+
+```bash
+npm run hermes:install
+```
+
+- `/kickbacks` shows Hermes plugin status, earnings, and the current ad.
+- `/kickbacks-click` records a plugin-owned click metric and returns the current
+  ad as a safe Markdown link.
+- Hermes TUI and classic CLI links use the current ad's safe `http(s)` URL.
+- `npm run hermes:update-safe` helps keep the local Hermes install current after
+  upstream Hermes updates.
+
+Backend metric acceptance, earnings movement, and payout settlement are separate
+proof layers; [HERMES.md](HERMES.md) keeps those boundaries explicit.
 
 ## 🚀 Install
 

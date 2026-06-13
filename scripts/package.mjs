@@ -43,14 +43,14 @@ function packageManifestForVsce(pkg) {
   };
   pj.license ??= "SEE LICENSE IN LICENSE";
   pj.homepage ??= "https://kickbacks.ai";
-  pj.bugs ??= { url: "https://github.com/andrewmccalip/kickbacks/issues" };
+  pj.bugs ??= { url: "https://github.com/RasputinKaiser/hermeskickbacks.ai/issues" };
   const c = pj.contributes?.commands;
   if (c && !c.some((x) => x.command === "kickbacks.signOut")) {
     const i = c.findIndex((x) => x.command === "kickbacks.signIn");
     if (i >= 0) c.splice(i + 1, 0,
       { command: "kickbacks.signOut", title: "Kickbacks: Sign out" });
   }
-  pj.description = "Get paid while you code. Subtle, clickable ads in the Claude Code and Codex spinners — 50/50 revenue split to users.";
+  pj.description = "Get paid while you code. Clickable sponsored slots for Claude Code, Codex, and Hermes Agent.";
   return pj;
 }
 
