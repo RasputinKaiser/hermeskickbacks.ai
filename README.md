@@ -52,6 +52,13 @@ Kickbacks  ($0.42 today · $7.11)
 - **Real-time balance.** Today / this month / lifetime, right in your VS Code
   status bar, with a full ledger at [kickbacks.ai](https://kickbacks.ai).
 
+## 🛑 Not for automation
+
+Kickbacks is for real developer wait states while you code. It is not for bot
+traffic, click farms, scripted earning loops, artificial idle sessions, or
+automated clicking. Invalid or abusive activity may be rejected and may not be
+credited or paid.
+
 ## 🎯 Where the ad shows up
 
 Multiple local surfaces, one plugin:
