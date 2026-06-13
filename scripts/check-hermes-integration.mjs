@@ -47,17 +47,27 @@ check("Hermes upload and TUI link scripts are wired", () => {
     "missing Hermes TUI link verify script",
   );
   assert(
+    pkg.scripts?.["hermes:cli-links"] === "node scripts/patch-hermes-cli-clickable-ads.mjs",
+    "missing Hermes classic CLI link patch script",
+  );
+  assert(
+    pkg.scripts?.["hermes:cli-verify"] === "node scripts/verify-hermes-cli-clickable-ads.mjs",
+    "missing Hermes classic CLI link verify script",
+  );
+  assert(
     pkg.scripts?.["hermes:verify"]?.startsWith("npm run upload:safety &&"),
     "Hermes verify should run upload safety first",
   );
   assert(
-    pkg.scripts?.["hermes:full-verify"] === "npm run hermes:verify && npm run hermes:tui-verify && npm run upload:audit-public",
+    pkg.scripts?.["hermes:full-verify"] === "npm run hermes:verify && npm run hermes:tui-verify && npm run hermes:cli-verify && npm run upload:audit-public",
     "missing full Hermes verification script",
   );
   assert(existsSync(join(root, "scripts", "check-upload-safety.mjs")), "missing upload safety checker");
   assert(existsSync(join(root, "scripts", "audit-public-upload.mjs")), "missing public upload auditor");
   assert(existsSync(join(root, "scripts", "patch-hermes-tui-clickable-ads.mjs")), "missing TUI link patcher");
   assert(existsSync(join(root, "scripts", "verify-hermes-tui-clickable-ads.mjs")), "missing TUI link verifier");
+  assert(existsSync(join(root, "scripts", "patch-hermes-cli-clickable-ads.mjs")), "missing classic CLI link patcher");
+  assert(existsSync(join(root, "scripts", "verify-hermes-cli-clickable-ads.mjs")), "missing classic CLI link verifier");
 });
 
 check("generated Python caches are not vendored", () => {

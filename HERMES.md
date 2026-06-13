@@ -49,6 +49,8 @@ npm run hermes:verify
 npm run hermes:full-verify
 npm run hermes:tui-links
 npm run hermes:tui-verify
+npm run hermes:cli-links
+npm run hermes:cli-verify
 npm run upload:audit-public
 node scripts/install-hermes-plugin.mjs --dry-run
 node scripts/install-hermes-plugin.mjs --check
@@ -82,14 +84,31 @@ After commit `9f391d6ee3ada9fb7148e1ac8be6143ed91fd693`, a live Hermes TUI
 session opened a status-row ad phrase from the running `hermes` command. Treat
 that as local TUI click proof only; backend metric acceptance, earnings
 movement, and payout settlement remain separate proof layers.
+
+`npm run hermes:cli-links` patches the local Hermes classic `--cli`
+prompt_toolkit spinner so the same sponsored phrase is wrapped in an OSC 8
+terminal hyperlink when the cached ad has a safe `http(s)` `click_url`.
+`npm run hermes:cli-verify` checks the active `hermes` command path, confirms
+the classic CLI link markers are present, runs the focused Hermes Kickbacks
+tests, and reports whether the installed Hermes repo is behind `origin/main`.
+That update status is maintenance context only, not click or earnings proof.
+After `hermes update`, rerun:
+
+```bash
+npm run hermes:tui-links
+npm run hermes:cli-links
+npm run hermes:full-verify
+```
+
 `npm run upload:audit-public` fetches `origin/main` and audits the public branch,
 remote paths/refs, repository metadata, and GitHub code search for blocked
 identity strings. It is intentionally separate from `hermes:verify` because it
 uses network and GitHub CLI state.
 `npm run hermes:full-verify` runs local plugin verification, local Hermes TUI
-clickable-ad verification, and the public upload audit in sequence. It is the
-strongest repeatable proof command, but it depends on the local Hermes TUI and
-network/GitHub CLI state.
+clickable-ad verification, local Hermes classic CLI clickable-ad verification,
+and the public upload audit in sequence. It is the strongest repeatable proof
+command, but it depends on the local Hermes install and network/GitHub CLI
+state.
 
 ## Runtime Contract
 
